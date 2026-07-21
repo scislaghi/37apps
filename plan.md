@@ -29,9 +29,17 @@ Goal: publish ~15 games in 6 months to find out if at least one reaches
 ## 3. Ads & Analytics
 
 - Single AdMob account for all games (one per game = separate ad unit IDs, not
-  separate accounts).
+  separate accounts). Concretely: one Google AdMob account → register each
+  game as its own "app" inside that account → each app gets its own App ID
+  plus its own banner/interstitial/rewarded ad unit IDs. Payments, reporting,
+  and mediation stay unified across the whole portfolio; only the IDs differ
+  per game.
 - Ad formats: banner, interstitial (between runs), rewarded video (continue /
   bonus score).
+- Implementation: `@capacitor-community/admob` plugin, one integration per
+  game (banner + interstitial wired in Ploop Chess using Google's public
+  test ad unit IDs until the real AdMob account/app entries exist — swap in
+  real IDs at publish time, no code changes needed elsewhere).
 - Single Firebase project, one app entry per game, using only:
   - Firebase Analytics (minimal events: install, first open, session,
     Day 1 retention, Day 7 retention)
@@ -59,7 +67,6 @@ Goal: publish ~15 games in 6 months to find out if at least one reaches
   - Save manager (local storage only)
   - Audio manager
   - Skin/theme system (shared visual brand, swappable color themes)
-  - Localization
   - Settings screen
 - Target flow per game:
   Menu → Play → Game Over → Retry / Watch ad to continue → Back to Menu.
@@ -71,6 +78,10 @@ Goal: publish ~15 games in 6 months to find out if at least one reaches
 - No levels, no story, no complex inventory — score-driven only (best score,
   maybe simple achievements/skins).
 - Each game = "known mechanic + one new twist" (avoid direct clones).
+- **English only** — all in-game text, store listings, and UI copy across
+  every game. No localization/multi-language support for now: keeps the
+  pipeline simple and shipping fast; revisit only if a specific game gets
+  real traction.
 - Group games into families to speed up development:
   - Tap games (~10) — 3–7 days each
   - Physics games (~8) — 1–2 weeks each
@@ -111,11 +122,16 @@ and fonts.)*
       `brand/brand-kit-v1.html`; per-game re-theming still pending
 - [x] Scaffold Ploop Chess as a React + Vite + Capacitor project
       (`games/ploop-chess/`) — game #1, reusing the existing prototype
-- [ ] Set up Google Play Console account
-- [ ] Set up AdMob account + first ad units
-- [ ] Set up Firebase project (Analytics + Crashlytics)
-- [ ] Build Ploop Chess end-to-end on device (validates full pipeline:
+- [x] Build Ploop Chess end-to-end on device (validates full pipeline:
       build → Capacitor → Android/iOS install)
+- [ ] Translate Ploop Chess UI copy to English (was Italian in the prototype)
+- [ ] Re-theme Ploop Chess onto the brand kit's dark neutral + accent palette
+- [ ] Wire AdMob (banner + interstitial) in Ploop Chess with Google's public
+      test ad unit IDs
+- [ ] Set up Google Play Console account
+- [ ] Set up real AdMob account + register Ploop Chess as an app + real ad
+      unit IDs (swap in over the test IDs)
+- [ ] Set up Firebase project (Analytics + Crashlytics)
 - [ ] Publish game #1 (Ploop Chess) on Android
 - [ ] Create privacy policy / terms templates
 - [ ] Set up Apple Developer account

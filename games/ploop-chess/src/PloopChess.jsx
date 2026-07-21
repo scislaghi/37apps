@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { initAds, showInterstitial } from "./ads.js";
 
 const N = 7;
 const TYPES = ["+", "—", "|", "✕", "✱"];
-const TYPE_LABEL = { "+": "orizzontale e verticale", "—": "solo orizzontale", "|": "solo verticale", "✕": "solo diagonale", "✱": "tutte le direzioni" };
+const TYPE_LABEL = { "+": "horizontal & vertical", "—": "horizontal only", "|": "vertical only", "✕": "diagonal only", "✱": "all directions" };
 const DIRS = {
   "+": [[0,1],[0,-1],[1,0],[-1,0]],
   "—": [[0,1],[0,-1]],
@@ -42,25 +43,28 @@ function spawnEnemy(player, enemies) {
   return { ...pos, type: randType(), id: idCounter++ };
 }
 
-/* ── styles ── */
+/* ── styles — 37apps brand kit: dark neutral base + Violet Spark accent ── */
 const palette = {
-  bg: "#f4f0fa",
-  boardBorder: "#d8d0e4",
-  cellLight: "#f8f4ff",
-  cellDark: "#ece4f4",
-  playerBg: "#3cc",
-  playerGlow: "rgba(60,204,204,0.35)",
-  enemyBg: "#3d3d52",
-  moveDot: "rgba(80,160,240,0.55)",
-  captureBg: "rgba(80,200,100,0.35)",
-  threatBg: "rgba(240,90,90,0.10)",
-  timerBar: "#3cc",
-  timerLow: "#f76c6c",
-  text: "#2d2d4e",
-  textMuted: "#8888aa",
-  panelBg: "rgba(255,255,255,0.95)",
-  accent: "#f7a8c4",
+  bg: "#15141B",
+  boardBorder: "#3A3944",
+  cellLight: "#1E1D26",
+  cellDark: "#242330",
+  playerBg: "#9B6BFF",
+  playerGlow: "rgba(155,107,255,0.4)",
+  enemyBg: "#3A3944",
+  moveDot: "rgba(155,107,255,0.55)",
+  captureBg: "rgba(55,214,160,0.28)",
+  threatBg: "rgba(255,107,87,0.12)",
+  timerBar: "#9B6BFF",
+  timerLow: "#FF6B57",
+  text: "#F5F3F0",
+  textMuted: "#9A98A6",
+  panelBg: "#2A2933",
+  accent: "#9B6BFF",
 };
+
+const fontUI = "'Avenir Next', Avenir, 'Century Gothic', system-ui, sans-serif";
+const fontDisplay = "ui-rounded, 'SF Pro Rounded', 'Segoe UI Rounded', 'Avenir Next', system-ui, sans-serif";
 
 export default function PloopChess() {
   const [phase, setPhase] = useState("start");
@@ -73,6 +77,12 @@ export default function PloopChess() {
   const [typeChanged, setTypeChanged] = useState(false);
   const [trapped, setTrapped] = useState(false);
   const timerRef = useRef(null);
+  const playCountRef = useRef(0);
+
+  /* ── ads: init once on mount ── */
+  useEffect(() => {
+    initAds();
+  }, []);
 
   /* ── compute valid (safe) moves ── */
   const { safeMoves, threatSet } = useMemo(() => {
@@ -133,6 +143,9 @@ export default function PloopChess() {
 
   /* ── start / restart ── */
   const startGame = useCallback(() => {
+    if (playCountRef.current > 0) showInterstitial();
+    playCountRef.current += 1;
+
     const p = { row: 3, col: 3, type: randType() };
     const e = [];
     for (let i = 0; i < 3; i++) { const en = spawnEnemy(p, e); if (en) e.push(en); }
@@ -206,7 +219,7 @@ export default function PloopChess() {
     <div style={{
       minHeight: "100vh", display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center",
-      background: palette.bg, fontFamily: "'Trebuchet MS', system-ui, sans-serif",
+      background: palette.bg, fontFamily: fontUI,
       userSelect: "none", WebkitUserSelect: "none", padding: 12,
     }}>
 
@@ -218,10 +231,10 @@ export default function PloopChess() {
         }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
             <span style={{ fontSize: 15, color: palette.textMuted, fontWeight: 600 }}>
-              SCORE <span style={{ fontSize: 26, color: palette.text, fontWeight: 800 }}>{score}</span>
+              SCORE <span style={{ fontSize: 26, color: palette.text, fontWeight: 800, fontFamily: fontDisplay }}>{score}</span>
             </span>
             <span style={{
-              fontSize: 26, fontWeight: 800,
+              fontSize: 26, fontWeight: 800, fontFamily: fontDisplay,
               color: timer < 8 ? palette.timerLow : palette.text,
               fontVariantNumeric: "tabular-nums",
             }}>
@@ -230,7 +243,7 @@ export default function PloopChess() {
           </div>
           {/* timer bar */}
           <div style={{
-            height: 6, borderRadius: 3, background: "rgba(0,0,0,0.06)", overflow: "hidden",
+            height: 6, borderRadius: 3, background: "rgba(255,255,255,0.08)", overflow: "hidden",
           }}>
             <div style={{
               height: "100%", borderRadius: 3,
@@ -249,7 +262,7 @@ export default function PloopChess() {
         gridTemplateRows: `repeat(${N}, ${cellSize})`,
         border: `3px solid ${palette.boardBorder}`,
         borderRadius: 10, overflow: "hidden",
-        boxShadow: "0 6px 28px rgba(50,30,80,0.12)",
+        boxShadow: "0 6px 28px rgba(0,0,0,0.35)",
         position: "relative",
       }}>
         {Array.from({ length: N * N }).map((_, i) => {
@@ -355,7 +368,7 @@ export default function PloopChess() {
                   zIndex: 5, pointerEvents: "none",
                   animation: "flashUp 0.7s ease-out forwards",
                 }}>
-                  <span style={{ fontSize: 15, fontWeight: 800, color: "#3caa6c" }}>+2s</span>
+                  <span style={{ fontSize: 15, fontWeight: 800, color: "#37D6A0" }}>+2s</span>
                 </div>
               )}
             </div>
@@ -368,7 +381,7 @@ export default function PloopChess() {
         <div style={{
           marginTop: 12, display: "flex", alignItems: "center", gap: 10,
           padding: "8px 16px", borderRadius: 10,
-          background: typeChanged ? "rgba(60,204,204,0.15)" : "rgba(0,0,0,0.04)",
+          background: typeChanged ? "rgba(155,107,255,0.18)" : "rgba(255,255,255,0.04)",
           transition: "background 0.3s",
           maxWidth: N * 56,
         }}>
@@ -385,7 +398,7 @@ export default function PloopChess() {
           </span>
           {typeChanged && (
             <span style={{ fontSize: 12, fontWeight: 700, color: palette.playerBg, marginLeft: "auto" }}>
-              NUOVO!
+              NEW!
             </span>
           )}
         </div>
@@ -398,7 +411,7 @@ export default function PloopChess() {
           background: "rgba(240,90,90,0.12)", color: palette.timerLow,
           fontSize: 15, fontWeight: 700, textAlign: "center",
         }}>
-          Intrappolato! Nessuna mossa sicura...
+          Trapped! No safe moves left...
         </div>
       )}
 
@@ -409,9 +422,9 @@ export default function PloopChess() {
           justifyContent: "center",
         }}>
           {[
-            { color: palette.moveDot, label: "mossa sicura" },
-            { color: "rgba(80,200,100,0.5)", label: "cattura" },
-            { color: "rgba(240,90,90,0.25)", label: "zona pericolo" },
+            { color: palette.moveDot, label: "safe move" },
+            { color: "rgba(55,214,160,0.6)", label: "capture" },
+            { color: "rgba(255,107,87,0.35)", label: "danger zone" },
           ].map(({ color, label }) => (
             <div key={label} style={{ display: "flex", alignItems: "center", gap: 4 }}>
               <div style={{ width: 10, height: 10, borderRadius: "50%", background: color }} />
@@ -426,19 +439,19 @@ export default function PloopChess() {
         <div style={{
           position: "absolute", inset: 0, display: "flex", flexDirection: "column",
           alignItems: "center", justifyContent: "center",
-          background: "rgba(244,240,250,0.96)", zIndex: 10,
+          background: "rgba(21,20,27,0.96)", zIndex: 10,
         }}>
-          <div style={{ fontSize: 48, fontWeight: 900, color: palette.text, marginBottom: 4 }}>
+          <div style={{ fontSize: 48, fontWeight: 900, color: palette.text, marginBottom: 4, fontFamily: fontDisplay }}>
             PLOOP
           </div>
-          <div style={{ fontSize: 24, fontWeight: 300, color: palette.textMuted, marginBottom: 30, letterSpacing: 4 }}>
+          <div style={{ fontSize: 24, fontWeight: 300, color: palette.textMuted, marginBottom: 30, letterSpacing: 4, fontFamily: fontDisplay }}>
             CHESS
           </div>
 
           {/* symbols legend */}
           <div style={{
             background: palette.panelBg, borderRadius: 14, padding: "16px 24px",
-            marginBottom: 28, boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
+            marginBottom: 28, boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
             display: "flex", flexDirection: "column", gap: 8, minWidth: 220,
           }}>
             {TYPES.map(t => (
@@ -455,11 +468,11 @@ export default function PloopChess() {
           </div>
 
           <div style={{ fontSize: 13, color: palette.textMuted, textAlign: "center", maxWidth: 260, lineHeight: 1.5, marginBottom: 24 }}>
-            Cattura le pedine nemiche senza finire nel loro raggio d'azione. Timer 30s, +2s per cattura.
+            Capture enemy pieces without stepping into their range. 30s timer, +2s per capture.
           </div>
 
           <div style={{
-            fontSize: 18, fontWeight: 700, color: palette.text,
+            fontSize: 18, fontWeight: 700, color: palette.text, fontFamily: fontDisplay,
             animation: "pulse 1.6s ease-in-out infinite",
             cursor: "pointer",
           }} onClick={startGame}>
@@ -479,30 +492,30 @@ export default function PloopChess() {
         <div style={{
           position: "absolute", inset: 0, display: "flex", flexDirection: "column",
           alignItems: "center", justifyContent: "center",
-          background: "rgba(30,20,50,0.50)", zIndex: 10,
+          background: "rgba(21,20,27,0.7)", zIndex: 10,
         }}>
           <div style={{
             background: palette.panelBg, borderRadius: 18, padding: "32px 40px",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
             textAlign: "center", minWidth: 220,
           }}>
             <div style={{ fontSize: 28, fontWeight: 800, color: palette.text, marginBottom: 6 }}>
-              {timer <= 0 ? "Tempo scaduto!" : "Catturato!"}
+              {timer <= 0 ? "Time's up!" : "Captured!"}
             </div>
             <div style={{ fontSize: 13, color: palette.textMuted, marginBottom: 18 }}>SCORE</div>
-            <div style={{ fontSize: 48, fontWeight: 900, color: palette.text, marginBottom: 6 }}>
+            <div style={{ fontSize: 48, fontWeight: 900, color: palette.text, marginBottom: 6, fontFamily: fontDisplay }}>
               {score}
             </div>
             <div style={{ fontSize: 13, color: palette.textMuted, marginBottom: 4 }}>
               BEST: {best}
             </div>
             {score > 0 && score >= best && (
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#e85d75", marginBottom: 8 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: palette.accent, marginBottom: 8 }}>
                 ★ NEW BEST ★
               </div>
             )}
             <div style={{
-              marginTop: 20, fontSize: 16, fontWeight: 700, color: palette.text,
+              marginTop: 20, fontSize: 16, fontWeight: 700, color: palette.text, fontFamily: fontDisplay,
               cursor: "pointer", animation: "pulse 1.6s ease-in-out infinite",
             }} onClick={startGame}>
               TAP TO RETRY
