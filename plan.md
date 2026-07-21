@@ -153,6 +153,10 @@ and fonts.)*
       package — `ads.js`, `save.js`, `theme.js`, and the `ScoreHeader` /
       `StartScreen` / `GameOverCard` components; all 4 existing games
       migrated over and re-verified headless, no native/build-side impact
+- [x] Scaffold Skyhop as a React + Vite + Capacitor project
+      (`games/skyhop/`) — game #5, Flappy Bird–style flap/gravity physics;
+      built using `@37apps/core` from the start; core loop verified
+      headless, AdMob + save wired the same way as games #1–#4
 - [ ] Set up Google Play Console account
 - [ ] Set up real AdMob account + register each game as its own app + real
       ad unit IDs (swap in over the test IDs)

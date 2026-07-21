@@ -64,14 +64,22 @@
   miss → game over, best-score persistence all confirmed); AdMob wired the
   same way as the other games.
 
-## Backlog
-
-### Skyhop
+### Skyhop — game #5
 - **Family**: tap games
 - **Mechanic**: tap to flap/rise, gravity pulls down, dodge scrolling
-  obstacles (Flappy Bird–style).
-- **Twist**: obstacle gaps rotate slightly or narrow as score increases,
-  instead of static pipes.
+  pipe gaps (Flappy Bird–style). Real velocity/gravity physics, not a
+  discrete state machine like the other games.
+- **Twist**: gap height shrinks and each pipe pair tilts a few degrees
+  (randomized) as score increases, instead of static upright pipes.
+- **Status**: built using `@37apps/core` from the start (no per-game
+  ads.js/save.js duplication). Core loop verified headless — flap physics,
+  gravity, gap collision, scoring, and game-over all confirmed correct via
+  direct instrumentation (an initial quick test looked like a bug — the
+  game was fine, the test's tap cadence was the issue). AdMob + save wired
+  the same way as the other games. Accent: Signal Coral, per the original
+  brand kit mockup.
+
+## Backlog
 
 ### Orbit
 - **Family**: physics games
