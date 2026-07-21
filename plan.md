@@ -133,6 +133,12 @@ and fonts.)*
 - [x] Scaffold Morph as a React + Vite + Capacitor project
       (`games/morph/`) — game #2, built from the drag-to-morph idea; core
       loop verified headless, AdMob + save wired the same way as game #1
+- [x] Scaffold Pulse as a React + Vite + Capacitor project
+      (`games/pulse/`) — game #3, tap-timing mechanic; core loop verified
+      headless, AdMob + save wired the same way as games #1–#2
+- [ ] Decide: extract the shared "core" (ads, save, UI patterns) now that
+      3 games repeat the same modules verbatim, instead of duplicating a
+      4th time
 - [ ] Set up Google Play Console account
 - [ ] Set up real AdMob account + register each game as its own app + real
       ad unit IDs (swap in over the test IDs)

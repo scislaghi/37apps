@@ -30,6 +30,25 @@
   verified headless (drag → morph → collision → game over all confirmed
   working); AdMob + best-score persistence wired with the same pattern as
   Ploop Chess.
+- Reworked after feedback: rotated to a vertical scroll (obstacles move
+  top-to-bottom toward a player fixed near the bottom, matching phone
+  portrait orientation), player restyled as a gelatinous blob (gradient
+  fill, bouncy overshoot morph transition, idle squash/stretch wobble,
+  eyes), and obstacles/background now cycle through the full brand accent
+  palette instead of a single neutral tone.
+
+### Pulse — game #3
+- **Family**: tap games
+- **Mechanic**: a marker oscillates back and forth on a bar; tap to stop it
+  inside a target zone that shrinks each round. No physics, no scrolling —
+  the simplest build of the three so far.
+- **Twist**: landing dead-center scores a PERFECT; consecutive perfects
+  build a streak that adds a scoring bonus. A non-perfect hit still scores
+  but resets the streak; missing the zone entirely ends the run.
+- **Status**: built (React + Vite + Capacitor), core loop verified headless
+  (tap timing, scoring, streak bonus, miss → game over, best-score
+  persistence across restarts all confirmed); AdMob wired the same way as
+  the other two games.
 
 ## Backlog
 
@@ -47,13 +66,6 @@
 - **Twist**: a perfectly aligned drop adds width back instead of only ever
   shrinking — the tower can "recover."
 
-### Pulse
-- **Family**: tap games
-- **Mechanic**: a marker oscillates back and forth; tap to stop it inside a
-  target zone that shrinks each round. No physics, no scrolling — the
-  simplest possible build.
-- **Twist**: consecutive perfect stops build a streak multiplier.
-
 ### Orbit
 - **Family**: physics games
 - **Mechanic**: a ball orbits a central point; tap to reverse orbit
@@ -65,17 +77,6 @@
 - **Mechanic**: a rotating filled circle; tap to slice it at a precise
   point, trying to keep both halves balanced.
 - **Twist**: TBD.
-
-### Morph *(placeholder name)*
-- **Family**: endless runners
-- **Mechanic**: an infinite runner where the player is a cube that moves
-  forward automatically. Dragging up or down morphs it into a vertical or
-  horizontal rectangle. Obstacles along the path have gaps of a specific
-  shape/size — the player must morph into the matching shape before
-  reaching each one. Wrong shape/size on contact = game over.
-- **Twist**: continuous shape-matching under time pressure, instead of the
-  usual jump/slide runner input — the "twist" IS the core mechanic here.
-- **Status**: idea (submitted by Simone, not yet scoped/prototyped).
 
 ---
 
