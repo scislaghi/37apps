@@ -124,13 +124,18 @@ and fonts.)*
       (`games/ploop-chess/`) — game #1, reusing the existing prototype
 - [x] Build Ploop Chess end-to-end on device (validates full pipeline:
       build → Capacitor → Android/iOS install)
-- [ ] Translate Ploop Chess UI copy to English (was Italian in the prototype)
-- [ ] Re-theme Ploop Chess onto the brand kit's dark neutral + accent palette
-- [ ] Wire AdMob (banner + interstitial) in Ploop Chess with Google's public
-      test ad unit IDs
+- [x] Translate Ploop Chess UI copy to English (was Italian in the prototype)
+- [x] Re-theme Ploop Chess onto the brand kit's dark neutral + accent palette
+      (Violet Spark)
+- [x] Wire AdMob (banner + interstitial) in Ploop Chess with Google's public
+      test ad unit IDs — confirmed rendering a real test banner on Android
+- [x] Persist best score locally (`@capacitor/preferences`) in Ploop Chess
+- [x] Scaffold Morph as a React + Vite + Capacitor project
+      (`games/morph/`) — game #2, built from the drag-to-morph idea; core
+      loop verified headless, AdMob + save wired the same way as game #1
 - [ ] Set up Google Play Console account
-- [ ] Set up real AdMob account + register Ploop Chess as an app + real ad
-      unit IDs (swap in over the test IDs)
+- [ ] Set up real AdMob account + register each game as its own app + real
+      ad unit IDs (swap in over the test IDs)
 - [ ] Set up Firebase project (Analytics + Crashlytics)
 - [ ] Publish game #1 (Ploop Chess) on Android
 - [ ] Create privacy policy / terms templates

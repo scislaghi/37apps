@@ -17,6 +17,20 @@
 - **Status**: working prototype exists (plain React/DOM), being wrapped as
   the first real Capacitor app.
 
+### Morph — game #2
+- **Family**: endless runners
+- **Mechanic**: an infinite runner where the player is a cube that moves
+  forward automatically. Dragging up or down morphs it into a vertical or
+  horizontal rectangle. Obstacles along the path have gaps of a specific
+  shape/size — the player must morph into the matching shape before
+  reaching each one. Wrong shape/size on contact = game over.
+- **Twist**: continuous shape-matching under time pressure, instead of the
+  usual jump/slide runner input — the "twist" IS the core mechanic here.
+- **Status**: built from scratch (React + Vite + Capacitor), core loop
+  verified headless (drag → morph → collision → game over all confirmed
+  working); AdMob + best-score persistence wired with the same pattern as
+  Ploop Chess.
+
 ## Backlog
 
 ### Skyhop
