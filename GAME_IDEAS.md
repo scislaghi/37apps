@@ -52,6 +52,17 @@
   point, trying to keep both halves balanced.
 - **Twist**: TBD.
 
+### Morph *(placeholder name)*
+- **Family**: endless runners
+- **Mechanic**: an infinite runner where the player is a cube that moves
+  forward automatically. Dragging up or down morphs it into a vertical or
+  horizontal rectangle. Obstacles along the path have gaps of a specific
+  shape/size — the player must morph into the matching shape before
+  reaching each one. Wrong shape/size on contact = game over.
+- **Twist**: continuous shape-matching under time pressure, instead of the
+  usual jump/slide runner input — the "twist" IS the core mechanic here.
+- **Status**: idea (submitted by Simone, not yet scoped/prototyped).
+
 ---
 
 ## Template for new ideas

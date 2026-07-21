@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { initAds, showInterstitial } from "./ads.js";
+import { loadBestScore, saveBestScore } from "./save.js";
 
 const N = 7;
 const TYPES = ["+", "—", "|", "✕", "✱"];
@@ -78,11 +79,25 @@ export default function PloopChess() {
   const [trapped, setTrapped] = useState(false);
   const timerRef = useRef(null);
   const playCountRef = useRef(0);
+  const bestLoadedRef = useRef(false);
 
   /* ── ads: init once on mount ── */
   useEffect(() => {
     initAds();
   }, []);
+
+  /* ── best score: load once on mount, persist on every change after that ── */
+  useEffect(() => {
+    loadBestScore().then(stored => {
+      setBest(stored);
+      bestLoadedRef.current = true;
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!bestLoadedRef.current) return;
+    saveBestScore(best);
+  }, [best]);
 
   /* ── compute valid (safe) moves ── */
   const { safeMoves, threatSet } = useMemo(() => {
