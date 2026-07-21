@@ -1,18 +1,20 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { initAds, showInterstitial } from "./ads.js";
-import { loadBestScore, saveBestScore } from "./save.js";
+import { initAds, showInterstitial } from "@37apps/core/ads.js";
+import { createBestScoreStore } from "@37apps/core/save.js";
+import { baseTheme, fontUI, fontDisplay, ACCENTS } from "@37apps/core/theme.js";
+import ScoreHeader from "@37apps/core/components/ScoreHeader.jsx";
+import StartScreen from "@37apps/core/components/StartScreen.jsx";
+import GameOverCard from "@37apps/core/components/GameOverCard.jsx";
+
+const { loadBestScore, saveBestScore } = createBestScoreStore("morph.bestScore");
 
 /* ── 37apps brand kit, turned up: dark base + full accent palette for color ── */
 const palette = {
-  bg: "#15141B",
+  ...baseTheme,
   holeBorder: "rgba(245,243,240,0.55)",
-  text: "#F5F3F0",
-  textMuted: "#9A98A6",
-  panelBg: "#2A2933",
   success: "#37D6A0",
 };
 
-const ACCENTS = ["#FF6B57", "#FFB84D", "#C4E86B", "#37D6A0", "#3FC6E8", "#5B7FFF", "#9B6BFF", "#FF5EA8"];
 const PLAYER_GRADIENT = "linear-gradient(135deg, #3FC6E8, #9B6BFF)";
 
 const backgroundAtmosphere = `
@@ -23,9 +25,6 @@ const backgroundAtmosphere = `
   radial-gradient(480px 480px at 50% 50%, rgba(255,184,77,0.10), transparent 65%),
   #15141B
 `;
-
-const fontUI = "'Avenir Next', Avenir, 'Century Gothic', system-ui, sans-serif";
-const fontDisplay = "ui-rounded, 'SF Pro Rounded', 'Segoe UI Rounded', 'Avenir Next', system-ui, sans-serif";
 
 /* ── shape system ── */
 const SHAPES = {
@@ -229,19 +228,7 @@ export default function Morph() {
       }}
     >
       {/* header */}
-      {phase === "play" && (
-        <div style={{
-          display: "flex", justifyContent: "space-between", alignItems: "center",
-          padding: "16px 20px 8px", position: "relative", zIndex: 2,
-        }}>
-          <span style={{ fontSize: 15, color: palette.textMuted, fontWeight: 600 }}>
-            SCORE <span style={{ fontSize: 24, color: palette.text, fontWeight: 800, fontFamily: fontDisplay }}>{score}</span>
-          </span>
-          <span style={{ fontSize: 13, color: palette.textMuted, fontWeight: 600 }}>
-            BEST <span style={{ fontSize: 18, color: palette.text, fontWeight: 800, fontFamily: fontDisplay }}>{best}</span>
-          </span>
-        </div>
-      )}
+      {phase === "play" && <ScoreHeader score={score} best={best} theme={palette} />}
 
       {/* track */}
       <div ref={trackRef} style={{ flex: 1, position: "relative", overflow: "hidden" }}>
@@ -287,90 +274,37 @@ export default function Morph() {
 
         {/* ── START ── */}
         {phase === "start" && (
-          <div style={{
-            position: "absolute", inset: 0, display: "flex", flexDirection: "column",
-            alignItems: "center", justifyContent: "center", padding: 24,
-            background: backgroundAtmosphere, zIndex: 10,
-          }}>
-            <div style={{ fontSize: 46, fontWeight: 900, color: palette.text, marginBottom: 30, fontFamily: fontDisplay, letterSpacing: -1 }}>
-              MORPH
-            </div>
-
-            <div style={{ display: "flex", gap: 18, marginBottom: 26 }}>
-              {TYPES.map(t => (
-                <div key={t} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-                  <div style={{
-                    width: SHAPES[t].w, height: SHAPES[t].h, borderRadius: SHAPES[t].radius,
-                    background: PLAYER_GRADIENT,
-                  }} />
-                  <span style={{ fontSize: 11, color: palette.textMuted, fontWeight: 600 }}>
-                    {t === "cube" ? "hold still" : t === "tall" ? "drag up" : "drag down"}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div style={{ fontSize: 13, color: palette.textMuted, textAlign: "center", maxWidth: 260, lineHeight: 1.5, marginBottom: 24 }}>
-              Drag up or down to morph your shape and match each gap. Wrong shape on contact ends the run.
-            </div>
-
-            <div style={{
-              fontSize: 18, fontWeight: 700, color: palette.text, fontFamily: fontDisplay,
-              animation: "pulse 1.6s ease-in-out infinite",
-            }}>
-              TAP TO START
-            </div>
-
-            {best > 0 && (
-              <div style={{ marginTop: 14, fontSize: 13, color: palette.textMuted }}>
-                Best: {best}
+          <StartScreen
+            theme={palette}
+            background={backgroundAtmosphere}
+            title="MORPH"
+            preview={
+              <div style={{ display: "flex", gap: 18 }}>
+                {TYPES.map(t => (
+                  <div key={t} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+                    <div style={{
+                      width: SHAPES[t].w, height: SHAPES[t].h, borderRadius: SHAPES[t].radius,
+                      background: PLAYER_GRADIENT,
+                    }} />
+                    <span style={{ fontSize: 11, color: palette.textMuted, fontWeight: 600 }}>
+                      {t === "cube" ? "hold still" : t === "tall" ? "drag up" : "drag down"}
+                    </span>
+                  </div>
+                ))}
               </div>
-            )}
-          </div>
+            }
+            description="Drag up or down to morph your shape and match each gap. Wrong shape on contact ends the run."
+            best={best}
+          />
         )}
 
         {/* ── GAME OVER ── */}
         {phase === "dead" && (
-          <div style={{
-            position: "absolute", inset: 0, display: "flex", flexDirection: "column",
-            alignItems: "center", justifyContent: "center",
-            background: "rgba(21,20,27,0.72)", zIndex: 10,
-          }}>
-            <div style={{
-              background: palette.panelBg, borderRadius: 18, padding: "32px 40px",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.4)", textAlign: "center", minWidth: 220,
-            }}>
-              <div style={{ fontSize: 28, fontWeight: 800, color: palette.text, marginBottom: 6 }}>
-                Wrong shape!
-              </div>
-              <div style={{ fontSize: 13, color: palette.textMuted, marginBottom: 18 }}>SCORE</div>
-              <div style={{ fontSize: 48, fontWeight: 900, color: palette.text, marginBottom: 6, fontFamily: fontDisplay }}>
-                {score}
-              </div>
-              <div style={{ fontSize: 13, color: palette.textMuted, marginBottom: 4 }}>
-                BEST: {best}
-              </div>
-              {score > 0 && score >= best && (
-                <div style={{ fontSize: 13, fontWeight: 700, color: palette.success, marginBottom: 8 }}>
-                  ★ NEW BEST ★
-                </div>
-              )}
-              <div style={{
-                marginTop: 20, fontSize: 16, fontWeight: 700, color: palette.text, fontFamily: fontDisplay,
-                animation: "pulse 1.6s ease-in-out infinite",
-              }}>
-                TAP TO RETRY
-              </div>
-            </div>
-          </div>
+          <GameOverCard theme={palette} title="Wrong shape!" score={score} best={best} accentColor={palette.success} />
         )}
       </div>
 
       <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.55; }
-        }
         @keyframes jellyIdle {
           0%, 100% { transform: scale(1, 1); }
           50% { transform: scale(1.06, 0.92); }

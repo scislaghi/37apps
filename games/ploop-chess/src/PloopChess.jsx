@@ -1,6 +1,11 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { initAds, showInterstitial } from "./ads.js";
-import { loadBestScore, saveBestScore } from "./save.js";
+import { initAds, showInterstitial } from "@37apps/core/ads.js";
+import { createBestScoreStore } from "@37apps/core/save.js";
+import { baseTheme, fontUI, fontDisplay } from "@37apps/core/theme.js";
+import StartScreen from "@37apps/core/components/StartScreen.jsx";
+import GameOverCard from "@37apps/core/components/GameOverCard.jsx";
+
+const { loadBestScore, saveBestScore } = createBestScoreStore("ploopchess.bestScore");
 
 const N = 7;
 const TYPES = ["+", "—", "|", "✕", "✱"];
@@ -46,7 +51,7 @@ function spawnEnemy(player, enemies) {
 
 /* ── styles — 37apps brand kit: dark neutral base + Violet Spark accent ── */
 const palette = {
-  bg: "#15141B",
+  ...baseTheme,
   boardBorder: "#3A3944",
   cellLight: "#1E1D26",
   cellDark: "#242330",
@@ -58,14 +63,8 @@ const palette = {
   threatBg: "rgba(255,107,87,0.12)",
   timerBar: "#9B6BFF",
   timerLow: "#FF6B57",
-  text: "#F5F3F0",
-  textMuted: "#9A98A6",
-  panelBg: "#2A2933",
   accent: "#9B6BFF",
 };
-
-const fontUI = "'Avenir Next', Avenir, 'Century Gothic', system-ui, sans-serif";
-const fontDisplay = "ui-rounded, 'SF Pro Rounded', 'Segoe UI Rounded', 'Avenir Next', system-ui, sans-serif";
 
 export default function PloopChess() {
   const [phase, setPhase] = useState("start");
@@ -176,7 +175,6 @@ export default function PloopChess() {
 
   /* ── handle move ── */
   const handleTap = useCallback((row, col) => {
-    if (phase === "start" || phase === "dead") { startGame(); return; }
     if (phase !== "play" || trapped) return;
 
     const move = safeMoves.find(m => m.row === row && m.col === col);
@@ -223,7 +221,7 @@ export default function PloopChess() {
     }
 
     setPlayer(newP);
-  }, [phase, safeMoves, player, enemies, score, best, trapped, startGame]);
+  }, [phase, safeMoves, player, enemies, score, best, trapped]);
 
   /* ── render ── */
   const timerPct = Math.max(0, timer / 35);
@@ -231,7 +229,9 @@ export default function PloopChess() {
   const cellSize = `min(${Math.floor(380 / N)}px, ${Math.floor(85 / N)}vw)`;
 
   return (
-    <div style={{
+    <div
+      onPointerDown={() => { if (phase !== "play") startGame(); }}
+      style={{
       minHeight: "100vh", display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center",
       background: palette.bg, fontFamily: fontUI,
@@ -451,100 +451,50 @@ export default function PloopChess() {
 
       {/* ── START SCREEN ── */}
       {phase === "start" && (
-        <div style={{
-          position: "absolute", inset: 0, display: "flex", flexDirection: "column",
-          alignItems: "center", justifyContent: "center",
-          background: "rgba(21,20,27,0.96)", zIndex: 10,
-        }}>
-          <div style={{ fontSize: 48, fontWeight: 900, color: palette.text, marginBottom: 4, fontFamily: fontDisplay }}>
-            PLOOP
-          </div>
-          <div style={{ fontSize: 24, fontWeight: 300, color: palette.textMuted, marginBottom: 30, letterSpacing: 4, fontFamily: fontDisplay }}>
-            CHESS
-          </div>
-
-          {/* symbols legend */}
-          <div style={{
-            background: palette.panelBg, borderRadius: 14, padding: "16px 24px",
-            marginBottom: 28, boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
-            display: "flex", flexDirection: "column", gap: 8, minWidth: 220,
-          }}>
-            {TYPES.map(t => (
-              <div key={t} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{
-                  width: 30, height: 30, borderRadius: "50%",
-                  background: palette.enemyBg, display: "flex",
-                  alignItems: "center", justifyContent: "center",
-                  fontSize: 16, fontWeight: 800, color: "#fff", flexShrink: 0,
-                }}>{t}</div>
-                <span style={{ fontSize: 13, color: palette.text }}>{TYPE_LABEL[t]}</span>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ fontSize: 13, color: palette.textMuted, textAlign: "center", maxWidth: 260, lineHeight: 1.5, marginBottom: 24 }}>
-            Capture enemy pieces without stepping into their range. 30s timer, +2s per capture.
-          </div>
-
-          <div style={{
-            fontSize: 18, fontWeight: 700, color: palette.text, fontFamily: fontDisplay,
-            animation: "pulse 1.6s ease-in-out infinite",
-            cursor: "pointer",
-          }} onClick={startGame}>
-            TAP TO START
-          </div>
-
-          {best > 0 && (
-            <div style={{ marginTop: 14, fontSize: 13, color: palette.textMuted }}>
-              Best: {best}
+        <StartScreen
+          theme={palette}
+          background="rgba(21,20,27,0.96)"
+          title={<>
+            <div style={{ fontSize: 48, fontWeight: 900, color: palette.text, marginBottom: 4, fontFamily: fontDisplay }}>PLOOP</div>
+            <div style={{ fontSize: 24, fontWeight: 300, color: palette.textMuted, letterSpacing: 4, fontFamily: fontDisplay }}>CHESS</div>
+          </>}
+          preview={
+            <div style={{
+              background: palette.panelBg, borderRadius: 14, padding: "16px 24px",
+              boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
+              display: "flex", flexDirection: "column", gap: 8, minWidth: 220,
+            }}>
+              {TYPES.map(t => (
+                <div key={t} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{
+                    width: 30, height: 30, borderRadius: "50%",
+                    background: palette.enemyBg, display: "flex",
+                    alignItems: "center", justifyContent: "center",
+                    fontSize: 16, fontWeight: 800, color: "#fff", flexShrink: 0,
+                  }}>{t}</div>
+                  <span style={{ fontSize: 13, color: palette.text }}>{TYPE_LABEL[t]}</span>
+                </div>
+              ))}
             </div>
-          )}
-        </div>
+          }
+          description="Capture enemy pieces without stepping into their range. 30s timer, +2s per capture."
+          best={best}
+        />
       )}
 
       {/* ── GAME OVER ── */}
       {phase === "dead" && (
-        <div style={{
-          position: "absolute", inset: 0, display: "flex", flexDirection: "column",
-          alignItems: "center", justifyContent: "center",
-          background: "rgba(21,20,27,0.7)", zIndex: 10,
-        }}>
-          <div style={{
-            background: palette.panelBg, borderRadius: 18, padding: "32px 40px",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-            textAlign: "center", minWidth: 220,
-          }}>
-            <div style={{ fontSize: 28, fontWeight: 800, color: palette.text, marginBottom: 6 }}>
-              {timer <= 0 ? "Time's up!" : "Captured!"}
-            </div>
-            <div style={{ fontSize: 13, color: palette.textMuted, marginBottom: 18 }}>SCORE</div>
-            <div style={{ fontSize: 48, fontWeight: 900, color: palette.text, marginBottom: 6, fontFamily: fontDisplay }}>
-              {score}
-            </div>
-            <div style={{ fontSize: 13, color: palette.textMuted, marginBottom: 4 }}>
-              BEST: {best}
-            </div>
-            {score > 0 && score >= best && (
-              <div style={{ fontSize: 13, fontWeight: 700, color: palette.accent, marginBottom: 8 }}>
-                ★ NEW BEST ★
-              </div>
-            )}
-            <div style={{
-              marginTop: 20, fontSize: 16, fontWeight: 700, color: palette.text, fontFamily: fontDisplay,
-              cursor: "pointer", animation: "pulse 1.6s ease-in-out infinite",
-            }} onClick={startGame}>
-              TAP TO RETRY
-            </div>
-          </div>
-        </div>
+        <GameOverCard
+          theme={palette}
+          title={timer <= 0 ? "Time's up!" : "Captured!"}
+          score={score}
+          best={best}
+          accentColor={palette.accent}
+        />
       )}
 
-      {/* global keyframes */}
+      {/* game-specific keyframes (start/retry pulse comes from the shared components) */}
       <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.55; }
-        }
         @keyframes flashUp {
           0% { opacity: 1; transform: translateY(0); }
           100% { opacity: 0; transform: translateY(-22px); }

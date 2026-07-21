@@ -57,17 +57,26 @@ Goal: publish ~15 games in 6 months to find out if at least one reaches
   rendering, a clean fit for a Capacitor-wrapped web app). Each game is its
   own standalone Capacitor project (own bundle id, own store listing) under
   `games/<name>/`. AdMob via a Capacitor community plugin.
-- Shared framework ("core") — **not built upfront**: extracted from real
-  code once game #1 (Ploop Chess) has shipped and proven the full pipeline,
-  to avoid guessing abstractions before we know what's actually reused.
-  Will still cover the same responsibilities:
-  - UI system (menu, pause, game over)
-  - Score system (current + best score, local save)
-  - Ads manager (banner / interstitial / rewarded)
-  - Save manager (local storage only)
-  - Audio manager
-  - Skin/theme system (shared visual brand, swappable color themes)
-  - Settings screen
+- Shared framework: **`packages/core` (`@37apps/core`)**, an npm workspaces
+  package (root `package.json` lists `games/*` and `packages/*` as
+  workspaces). Extracted after 4 games had already duplicated the same
+  code verbatim, not designed upfront — evidence-based, not guessed.
+  Every game's `dist/` build stays a fully static, self-contained bundle;
+  the workspace link only matters at `npm run build` time, so nothing
+  changes about how each game is built/synced/released for Android or iOS.
+  Currently covers:
+  - `ads.js` — AdMob init/banner/interstitial (test IDs by default, real
+    per-game IDs can be passed in later)
+  - `save.js` — `createBestScoreStore(key)` factory over
+    `@capacitor/preferences`
+  - `theme.js` — shared neutrals (bg/text/textMuted/panelBg), the two font
+    stacks, and the 8-color accent palette
+  - `components/` — `ScoreHeader`, `StartScreen`, `GameOverCard` (the
+    screens that turned out identical in shape across games; each game
+    still owns its actual gameplay view and any header that doesn't fit,
+    e.g. Ploop Chess's timer bar)
+  - Still to fold in as more games are built: audio manager, settings
+    screen, skin/theme swapping beyond a single accent color
 - Target flow per game:
   Menu → Play → Game Over → Retry / Watch ad to continue → Back to Menu.
 
@@ -140,9 +149,10 @@ and fonts.)*
       (`games/stackr/`) — game #4, block-stacking with the same oscillation
       mechanic as Pulse; core loop verified headless, AdMob + save wired
       the same way as games #1–#3
-- [ ] Decide: extract the shared "core" (ads, save, UI patterns) now that
-      4 games repeat the same modules verbatim, instead of duplicating a
-      5th time
+- [x] Extract `packages/core` (`@37apps/core`) as an npm workspaces
+      package — `ads.js`, `save.js`, `theme.js`, and the `ScoreHeader` /
+      `StartScreen` / `GameOverCard` components; all 4 existing games
+      migrated over and re-verified headless, no native/build-side impact
 - [ ] Set up Google Play Console account
 - [ ] Set up real AdMob account + register each game as its own app + real
       ad unit IDs (swap in over the test IDs)

@@ -1,10 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { initAds, showInterstitial } from "./ads.js";
-import { loadBestScore, saveBestScore } from "./save.js";
+import { initAds, showInterstitial } from "@37apps/core/ads.js";
+import { createBestScoreStore } from "@37apps/core/save.js";
+import { baseTheme, fontUI, fontDisplay } from "@37apps/core/theme.js";
+import ScoreHeader from "@37apps/core/components/ScoreHeader.jsx";
+import StartScreen from "@37apps/core/components/StartScreen.jsx";
+import GameOverCard from "@37apps/core/components/GameOverCard.jsx";
+
+const { loadBestScore, saveBestScore } = createBestScoreStore("pulse.bestScore");
 
 /* ── 37apps brand kit: dark neutral base + Amber Pulse accent ── */
 const palette = {
-  bg: "#15141B",
+  ...baseTheme,
   track: "#2A2933",
   trackBorder: "#3A3944",
   zone: "rgba(255,184,77,0.28)",
@@ -12,14 +18,8 @@ const palette = {
   perfect: "#37D6A0",
   marker: "#FFB84D",
   markerGlow: "rgba(255,184,77,0.55)",
-  text: "#F5F3F0",
-  textMuted: "#9A98A6",
-  panelBg: "#2A2933",
   danger: "#FF6B57",
 };
-
-const fontUI = "'Avenir Next', Avenir, 'Century Gothic', system-ui, sans-serif";
-const fontDisplay = "ui-rounded, 'SF Pro Rounded', 'Segoe UI Rounded', 'Avenir Next', system-ui, sans-serif";
 
 const BAR_WIDTH = 280;
 const MARKER_SIZE = 20;
@@ -186,22 +186,7 @@ export default function Pulse() {
       }}
     >
       {phase === "play" && (
-        <div style={{
-          display: "flex", justifyContent: "space-between", alignItems: "center",
-          padding: "16px 20px 8px", position: "relative", zIndex: 2,
-        }}>
-          <span style={{ fontSize: 15, color: palette.textMuted, fontWeight: 600 }}>
-            SCORE <span style={{ fontSize: 24, color: palette.text, fontWeight: 800, fontFamily: fontDisplay }}>{score}</span>
-          </span>
-          {streak >= 2 && (
-            <span style={{ fontSize: 13, color: palette.perfect, fontWeight: 800, fontFamily: fontDisplay }}>
-              STREAK ×{streak}
-            </span>
-          )}
-          <span style={{ fontSize: 13, color: palette.textMuted, fontWeight: 600 }}>
-            BEST <span style={{ fontSize: 18, color: palette.text, fontWeight: 800, fontFamily: fontDisplay }}>{best}</span>
-          </span>
-        </div>
+        <ScoreHeader score={score} best={best} streak={streak} streakColor={palette.perfect} theme={palette} />
       )}
 
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
@@ -258,96 +243,40 @@ export default function Pulse() {
 
         {/* ── START ── */}
         {phase === "start" && (
-          <div style={{
-            position: "absolute", inset: 0, display: "flex", flexDirection: "column",
-            alignItems: "center", justifyContent: "center", padding: 24,
-            background: palette.bg, zIndex: 10,
-          }}>
-            <div style={{ fontSize: 46, fontWeight: 900, color: palette.text, marginBottom: 30, fontFamily: fontDisplay, letterSpacing: -1 }}>
-              PULSE
-            </div>
-
-            <div style={{ position: "relative", width: 220, height: 30, marginBottom: 26 }}>
-              <div style={{
-                position: "absolute", top: "50%", left: 0, right: 0, height: 12,
-                transform: "translateY(-50%)", background: palette.track,
-                border: `1px solid ${palette.trackBorder}`, borderRadius: 6,
-              }} />
-              <div style={{
-                position: "absolute", top: "50%", left: "38%", width: 60, height: 22,
-                transform: "translateY(-50%)", background: palette.zone,
-                border: `2px solid ${palette.zoneBorder}`, borderRadius: 7,
-              }} />
-              <div style={{
-                position: "absolute", top: "50%", left: "38%", width: 22, height: 22,
-                transform: "translateY(-50%)", background: palette.marker, borderRadius: "50%",
-                boxShadow: `0 0 14px ${palette.markerGlow}`,
-              }} />
-            </div>
-
-            <div style={{ fontSize: 13, color: palette.textMuted, textAlign: "center", maxWidth: 260, lineHeight: 1.5, marginBottom: 24 }}>
-              Tap when the marker is inside the zone. Land dead center for a
-              PERFECT — chain perfects for a streak bonus. Miss the zone and
-              it's over.
-            </div>
-
-            <div style={{
-              fontSize: 18, fontWeight: 700, color: palette.text, fontFamily: fontDisplay,
-              animation: "pulse 1.6s ease-in-out infinite",
-            }}>
-              TAP TO START
-            </div>
-
-            {best > 0 && (
-              <div style={{ marginTop: 14, fontSize: 13, color: palette.textMuted }}>
-                Best: {best}
+          <StartScreen
+            theme={palette}
+            title="PULSE"
+            preview={
+              <div style={{ position: "relative", width: 220, height: 30 }}>
+                <div style={{
+                  position: "absolute", top: "50%", left: 0, right: 0, height: 12,
+                  transform: "translateY(-50%)", background: palette.track,
+                  border: `1px solid ${palette.trackBorder}`, borderRadius: 6,
+                }} />
+                <div style={{
+                  position: "absolute", top: "50%", left: "38%", width: 60, height: 22,
+                  transform: "translateY(-50%)", background: palette.zone,
+                  border: `2px solid ${palette.zoneBorder}`, borderRadius: 7,
+                }} />
+                <div style={{
+                  position: "absolute", top: "50%", left: "38%", width: 22, height: 22,
+                  transform: "translateY(-50%)", background: palette.marker, borderRadius: "50%",
+                  boxShadow: `0 0 14px ${palette.markerGlow}`,
+                }} />
               </div>
-            )}
-          </div>
+            }
+            description="Tap when the marker is inside the zone. Land dead center for a PERFECT — chain perfects for a streak bonus. Miss the zone and it's over."
+            best={best}
+          />
         )}
 
         {/* ── GAME OVER ── */}
         {phase === "dead" && (
-          <div style={{
-            position: "absolute", inset: 0, display: "flex", flexDirection: "column",
-            alignItems: "center", justifyContent: "center",
-            background: "rgba(21,20,27,0.72)", zIndex: 10,
-          }}>
-            <div style={{
-              background: palette.panelBg, borderRadius: 18, padding: "32px 40px",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.4)", textAlign: "center", minWidth: 220,
-            }}>
-              <div style={{ fontSize: 28, fontWeight: 800, color: palette.text, marginBottom: 6 }}>
-                Missed it!
-              </div>
-              <div style={{ fontSize: 13, color: palette.textMuted, marginBottom: 18 }}>SCORE</div>
-              <div style={{ fontSize: 48, fontWeight: 900, color: palette.text, marginBottom: 6, fontFamily: fontDisplay }}>
-                {score}
-              </div>
-              <div style={{ fontSize: 13, color: palette.textMuted, marginBottom: 4 }}>
-                BEST: {best}
-              </div>
-              {score > 0 && score >= best && (
-                <div style={{ fontSize: 13, fontWeight: 700, color: palette.perfect, marginBottom: 8 }}>
-                  ★ NEW BEST ★
-                </div>
-              )}
-              <div style={{
-                marginTop: 20, fontSize: 16, fontWeight: 700, color: palette.text, fontFamily: fontDisplay,
-                animation: "pulse 1.6s ease-in-out infinite",
-              }}>
-                TAP TO RETRY
-              </div>
-            </div>
-          </div>
+          <GameOverCard theme={palette} title="Missed it!" score={score} best={best} accentColor={palette.perfect} />
         )}
       </div>
 
       <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.55; }
-        }
         @keyframes flashUp {
           0% { opacity: 1; transform: translate(-50%, -50%); }
           100% { opacity: 0; transform: translate(-50%, -80%); }

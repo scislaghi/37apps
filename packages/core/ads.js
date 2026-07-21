@@ -4,8 +4,9 @@ import { Capacitor } from '@capacitor/core';
 /**
  * Google's public test ad unit IDs — safe to ship during development, show
  * placeholder test creatives, and never generate real revenue or account
- * strikes. Swap these for the real per-game IDs once Morph is registered as
- * its own app inside the shared 37apps AdMob account (see plan.md, section 3).
+ * strikes. Pass real per-game { bannerId, interstitialId } once a game is
+ * registered as its own app inside the shared 37apps AdMob account (see
+ * plan.md, section 3) — no other code changes needed.
  */
 const TEST_IDS = {
   android: {
@@ -18,14 +19,18 @@ const TEST_IDS = {
   },
 };
 
-function adIds() {
+function resolveIds(overrides) {
   const platform = Capacitor.getPlatform();
-  return TEST_IDS[platform] || TEST_IDS.android;
+  const defaults = TEST_IDS[platform] || TEST_IDS.android;
+  return {
+    banner: overrides?.bannerId || defaults.banner,
+    interstitial: overrides?.interstitialId || defaults.interstitial,
+  };
 }
 
 let interstitialReady = false;
 
-export async function initAds() {
+export async function initAds(ids) {
   if (!Capacitor.isNativePlatform()) return;
 
   await AdMob.initialize();
@@ -34,28 +39,28 @@ export async function initAds() {
     interstitialReady = true;
   });
 
-  await showBanner();
-  await prepareInterstitial();
+  await showBanner(ids);
+  await prepareInterstitial(ids);
 }
 
-export async function showBanner() {
+export async function showBanner(ids) {
   if (!Capacitor.isNativePlatform()) return;
   await AdMob.showBanner({
-    adId: adIds().banner,
+    adId: resolveIds(ids).banner,
     adSize: BannerAdSize.BANNER,
     position: BannerAdPosition.BOTTOM_CENTER,
     margin: 0,
   });
 }
 
-export async function prepareInterstitial() {
+export async function prepareInterstitial(ids) {
   if (!Capacitor.isNativePlatform()) return;
   interstitialReady = false;
-  await AdMob.prepareInterstitial({ adId: adIds().interstitial });
+  await AdMob.prepareInterstitial({ adId: resolveIds(ids).interstitial });
 }
 
-export async function showInterstitial() {
+export async function showInterstitial(ids) {
   if (!Capacitor.isNativePlatform() || !interstitialReady) return;
   await AdMob.showInterstitial();
-  await prepareInterstitial();
+  await prepareInterstitial(ids);
 }

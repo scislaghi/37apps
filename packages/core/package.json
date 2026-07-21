@@ -1,0 +1,15 @@
+{
+  "name": "@37apps/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "dependencies": {
+    "@capacitor-community/admob": "^8.0.0",
+    "@capacitor/core": "^8.4.2",
+    "@capacitor/preferences": "^8.0.1"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
+}
