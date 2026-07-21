@@ -136,9 +136,13 @@ and fonts.)*
 - [x] Scaffold Pulse as a React + Vite + Capacitor project
       (`games/pulse/`) — game #3, tap-timing mechanic; core loop verified
       headless, AdMob + save wired the same way as games #1–#2
+- [x] Scaffold Stackr as a React + Vite + Capacitor project
+      (`games/stackr/`) — game #4, block-stacking with the same oscillation
+      mechanic as Pulse; core loop verified headless, AdMob + save wired
+      the same way as games #1–#3
 - [ ] Decide: extract the shared "core" (ads, save, UI patterns) now that
-      3 games repeat the same modules verbatim, instead of duplicating a
-      4th time
+      4 games repeat the same modules verbatim, instead of duplicating a
+      5th time
 - [ ] Set up Google Play Console account
 - [ ] Set up real AdMob account + register each game as its own app + real
       ad unit IDs (swap in over the test IDs)

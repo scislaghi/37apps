@@ -50,6 +50,20 @@
   persistence across restarts all confirmed); AdMob wired the same way as
   the other two games.
 
+### Stackr — game #4
+- **Family**: tap games
+- **Mechanic**: same oscillation as Pulse, applied to building a tower —
+  a block swings left/right above the stack; tap to drop it. Whatever
+  hangs outside the block below gets cut off and falls away; if it lands
+  completely outside, the tower topples (game over).
+- **Twist**: landing dead-center scores a PERFECT and keeps full width
+  instead of shrinking, plus builds a streak bonus, exactly like Pulse —
+  so the tower can "recover" instead of only ever narrowing.
+- **Status**: built (React + Vite + Capacitor), core loop verified
+  headless (drop → cut/overlap math, perfect-width recovery, streak bonus,
+  miss → game over, best-score persistence all confirmed); AdMob wired the
+  same way as the other games.
+
 ## Backlog
 
 ### Skyhop
@@ -58,13 +72,6 @@
   obstacles (Flappy Bird–style).
 - **Twist**: obstacle gaps rotate slightly or narrow as score increases,
   instead of static pipes.
-
-### Stackr
-- **Family**: tap games
-- **Mechanic**: tap to drop a moving block onto a growing stack; overhang
-  gets cut off.
-- **Twist**: a perfectly aligned drop adds width back instead of only ever
-  shrinking — the tower can "recover."
 
 ### Orbit
 - **Family**: physics games
