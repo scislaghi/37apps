@@ -1,0 +1,14 @@
+- generic [ref=e55]:
+  - button "Mute sound" [ref=e56] [cursor=pointer]: 🔊
+  - generic [ref=e57]:
+    - generic [ref=e58]: PLOOP
+    - generic [ref=e59]: HUNT
+  - generic [ref=e61]:
+    - generic [ref=e62]: you — moves any direction
+    - generic [ref=e87]: orthogonal
+    - generic [ref=e100]: horizontal only
+    - generic [ref=e109]: vertical only
+    - generic [ref=e118]: diagonal only
+    - generic [ref=e135]: omnidirectional
+  - generic [ref=e160]: "Capture enemy pieces before the timer runs out. Every move you make, the nearest enemy hunts back — let one land on you and it's over. No move hints: read the board yourself."
+  - generic [ref=e161]: TAP TO START

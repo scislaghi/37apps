@@ -139,6 +139,14 @@ and fonts.)*
 - [x] Wire AdMob (banner + interstitial) in Ploop Chess with Google's public
       test ad unit IDs — confirmed rendering a real test banner on Android
 - [x] Persist best score locally (`@capacitor/preferences`) in Ploop Chess
+- [x] Renamed Ploop Chess to **Ploop Hunt** and reworked it end-to-end —
+      new name/app id (`games/ploop-hunt/`,
+      `com.simonecislaghi.ploophunt`), icon-based pieces instead of text
+      characters, all move-hint overlays removed, player fixed to
+      omnidirectional movement, enemies now take a telegraphed chase move
+      after every player move (can catch the player), captures spawn a
+      safe-placed replacement, plus slide/telegraph/spawn/capture
+      animations and procedural SFX via `@37apps/core/audio.js`
 - [x] Scaffold Morph as a React + Vite + Capacitor project
       (`games/morph/`) — game #2, built from the drag-to-morph idea; core
       loop verified headless, AdMob + save wired the same way as game #1
@@ -157,11 +165,24 @@ and fonts.)*
       (`games/skyhop/`) — game #5, Flappy Bird–style flap/gravity physics;
       built using `@37apps/core` from the start; core loop verified
       headless, AdMob + save wired the same way as games #1–#4
+- [x] Scaffold Swipe as a React + Vite + Capacitor project
+      (`games/swipe/`) — game #6, directional hex-swipe with inverting
+      "trap" hexes; rebuilt from a canvas prototype into the shared
+      DOM/inline-style pattern and wired onto `@37apps/core` from the
+      start; core loop verified in a real browser via Playwright, AdMob +
+      save wired the same way as games #1–#5
+- [x] Scaffold Ploop Climb as a React + Vite + Capacitor project
+      (`games/ploop-climb/`) — game #7, isometric endless climber; rebuilt
+      from a canvas prototype into DOM/inline-style isometric blocks (CSS
+      `clip-path` per face) and wired onto `@37apps/core` from the start;
+      core loop verified in a real browser via Playwright (climbing
+      progress, tree-blocking, both death paths, retry), AdMob + save
+      wired the same way as games #1–#6
 - [ ] Set up Google Play Console account
 - [ ] Set up real AdMob account + register each game as its own app + real
       ad unit IDs (swap in over the test IDs)
 - [ ] Set up Firebase project (Analytics + Crashlytics)
-- [ ] Publish game #1 (Ploop Chess) on Android
+- [ ] Publish game #1 (Ploop Hunt) on Android
 - [ ] Create privacy policy / terms templates
 - [ ] Set up Apple Developer account
 - [ ] Port game #1 to iOS

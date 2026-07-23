@@ -8,15 +8,15 @@ import GameOverCard from "@37apps/core/components/GameOverCard.jsx";
 
 const { loadBestScore, saveBestScore } = createBestScoreStore("stackr.bestScore");
 
-/* ── 37apps brand kit: dark neutral base + Jade Flash accent ── */
+/* ── 37apps brand kit: light neutral base + Jade Flash accent ── */
 const palette = {
   ...baseTheme,
-  block: "#37D6A0",
-  blockShade: "#249A73",
-  blockCurrent: "#3FC6E8",
-  blockCurrentShade: "#2B8FA8",
-  perfect: "#FFB84D",
-  danger: "#FF6B57",
+  block: "#17D39B",
+  blockShade: "#128967",
+  blockCurrent: "#1DC0ED",
+  blockCurrentShade: "#1F7D97",
+  perfect: "#FFA31A",
+  danger: "#FF4529",
 };
 
 const BLOCK_HEIGHT = 36;
@@ -50,7 +50,6 @@ export default function Stackr() {
   const streakRef = useRef(0);
   const blocksRef = useRef([]);
   const currentWidthRef = useRef(BASE_WIDTH);
-  const playCountRef = useRef(0);
   const bestLoadedRef = useRef(false);
   const rafRef = useRef(null);
   const flashTimeoutRef = useRef(null);
@@ -72,7 +71,11 @@ export default function Stackr() {
   }, [best]);
 
   const endGame = useCallback(() => {
-    setPhase(p => (p === "play" ? "dead" : p));
+    setPhase(p => {
+      if (p !== "play") return p;
+      showInterstitial();
+      return "dead";
+    });
     setBest(b => (scoreRef.current > b ? scoreRef.current : b));
   }, []);
 
@@ -97,9 +100,6 @@ export default function Stackr() {
   }, [phase]);
 
   const startGame = useCallback(() => {
-    if (playCountRef.current > 0) showInterstitial();
-    playCountRef.current += 1;
-
     const gameWidth = trackRef.current ? trackRef.current.clientWidth : 360;
     const baseX = (gameWidth - BASE_WIDTH) / 2;
 
@@ -225,7 +225,7 @@ export default function Stackr() {
             <div style={{
               position: "absolute", left: movingX, width, top: fixedCurrentY, height: BLOCK_HEIGHT,
               background: `linear-gradient(180deg, ${palette.blockCurrent}, ${palette.blockCurrentShade})`,
-              borderRadius: 4, boxShadow: "0 0 18px rgba(63,198,232,0.5)",
+              borderRadius: 4, boxShadow: "0 0 18px rgba(29,192,237,0.5)",
             }} />
 
             {debris.map(d => (

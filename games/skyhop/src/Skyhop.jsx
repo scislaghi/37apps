@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { initAds, showInterstitial } from "@37apps/core/ads.js";
+import { initAudio, sfx } from "@37apps/core/audio.js";
 import { createBestScoreStore } from "@37apps/core/save.js";
 import { baseTheme, fontUI, fontDisplay } from "@37apps/core/theme.js";
 import ScoreHeader from "@37apps/core/components/ScoreHeader.jsx";
@@ -8,13 +9,13 @@ import GameOverCard from "@37apps/core/components/GameOverCard.jsx";
 
 const { loadBestScore, saveBestScore } = createBestScoreStore("skyhop.bestScore");
 
-/* ── 37apps brand kit: dark neutral base + Signal Coral accent ── */
+/* ── 37apps brand kit: light neutral base + Signal Coral accent ── */
 const palette = {
   ...baseTheme,
-  player: "#FF6B57",
-  playerGlow: "rgba(255,107,87,0.5)",
-  pipe: "#3A3944",
-  pipeEdge: "rgba(255,107,87,0.55)",
+  player: "#FF4529",
+  playerGlow: "rgba(255,69,41,0.5)",
+  pipe: "#726F7C",
+  pipeEdge: "rgba(255,69,41,0.55)",
 };
 
 const PLAYER_X = 90;
@@ -62,12 +63,12 @@ export default function Skyhop() {
   const velocityRef = useRef(0);
   const scoreRef = useRef(0);
   const spawnCursorRef = useRef(0);
-  const playCountRef = useRef(0);
   const bestLoadedRef = useRef(false);
   const rafRef = useRef(null);
 
   useEffect(() => {
     initAds();
+    initAudio();
   }, []);
 
   useEffect(() => {
@@ -83,7 +84,11 @@ export default function Skyhop() {
   }, [best]);
 
   const endGame = useCallback(() => {
-    setPhase(p => (p === "play" ? "dead" : p));
+    setPhase(p => {
+      if (p !== "play") return p;
+      showInterstitial();
+      return "dead";
+    });
     setBest(b => (scoreRef.current > b ? scoreRef.current : b));
   }, []);
 
@@ -107,6 +112,7 @@ export default function Skyhop() {
         velocityRef.current = 0;
       }
       if (playerYRef.current > trackHeight - PLAYER_RADIUS) {
+        sfx.hit();
         endGame();
         return;
       }
@@ -129,11 +135,13 @@ export default function Skyhop() {
           p.passed = true;
           scoreRef.current += 1;
           setScore(scoreRef.current);
+          sfx.score();
         }
       }
 
       if (gameOver) {
         pipesRef.current = pipes;
+        sfx.hit();
         endGame();
         return;
       }
@@ -154,9 +162,6 @@ export default function Skyhop() {
   }, [phase, endGame]);
 
   const startGame = useCallback(() => {
-    if (playCountRef.current > 0) showInterstitial();
-    playCountRef.current += 1;
-
     const trackHeight = trackRef.current ? trackRef.current.clientHeight : 640;
     pipesRef.current = [];
     playerYRef.current = trackHeight / 2;
@@ -173,6 +178,7 @@ export default function Skyhop() {
       return;
     }
     velocityRef.current = FLAP_VELOCITY;
+    sfx.tap();
   }, [phase, startGame]);
 
   const pipes = pipesRef.current;

@@ -1,15 +1,20 @@
+import { animated } from '@react-spring/web';
 import { fontDisplay } from '../theme.js';
+import { usePanelEntrance } from '../animation.js';
 
 export default function GameOverCard({ title, score, best, accentColor, theme }) {
+  const entrance = usePanelEntrance(true);
   return (
     <div style={{
       position: "absolute", inset: 0, display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center",
       background: "rgba(21,20,27,0.72)", zIndex: 10,
     }}>
-      <div style={{
+      <animated.div style={{
         background: theme.panelBg, borderRadius: 18, padding: "32px 40px",
         boxShadow: "0 8px 32px rgba(0,0,0,0.4)", textAlign: "center", minWidth: 220,
+        opacity: entrance.opacity,
+        transform: entrance.scale.to(s => `scale(${s})`),
       }}>
         <div style={{ fontSize: 28, fontWeight: 800, color: theme.text, marginBottom: 6 }}>
           {title}
@@ -32,7 +37,7 @@ export default function GameOverCard({ title, score, best, accentColor, theme })
         }}>
           TAP TO RETRY
         </div>
-      </div>
+      </animated.div>
       <style>{`
         @keyframes pulse {
           0%, 100% { opacity: 1; }

@@ -8,17 +8,17 @@ import GameOverCard from "@37apps/core/components/GameOverCard.jsx";
 
 const { loadBestScore, saveBestScore } = createBestScoreStore("pulse.bestScore");
 
-/* ── 37apps brand kit: dark neutral base + Amber Pulse accent ── */
+/* ── 37apps brand kit: light neutral base + Amber Pulse accent ── */
 const palette = {
   ...baseTheme,
-  track: "#2A2933",
-  trackBorder: "#3A3944",
-  zone: "rgba(255,184,77,0.28)",
-  zoneBorder: "#FFB84D",
-  perfect: "#37D6A0",
-  marker: "#FFB84D",
-  markerGlow: "rgba(255,184,77,0.55)",
-  danger: "#FF6B57",
+  track: "#EFEAE1",
+  trackBorder: "#D6D0C2",
+  zone: "rgba(255,163,26,0.24)",
+  zoneBorder: "#FFA31A",
+  perfect: "#17D39B",
+  marker: "#FFA31A",
+  markerGlow: "rgba(255,163,26,0.55)",
+  danger: "#FF4529",
 };
 
 const BAR_WIDTH = 280;
@@ -63,7 +63,6 @@ export default function Pulse() {
   const streakRef = useRef(0);
   const zoneRef = useRef({ center: 0, width: START_ZONE_WIDTH });
   const frozenUntilRef = useRef(0);
-  const playCountRef = useRef(0);
   const bestLoadedRef = useRef(false);
   const rafRef = useRef(null);
   const flashTimeoutRef = useRef(null);
@@ -85,7 +84,11 @@ export default function Pulse() {
   }, [best]);
 
   const endGame = useCallback(() => {
-    setPhase(p => (p === "play" ? "dead" : p));
+    setPhase(p => {
+      if (p !== "play") return p;
+      showInterstitial();
+      return "dead";
+    });
     setBest(b => (scoreRef.current > b ? scoreRef.current : b));
   }, []);
 
@@ -113,9 +116,6 @@ export default function Pulse() {
   }, [phase]);
 
   const startGame = useCallback(() => {
-    if (playCountRef.current > 0) showInterstitial();
-    playCountRef.current += 1;
-
     scoreRef.current = 0;
     streakRef.current = 0;
     phaseAngleRef.current = 0;

@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Ploop Climb</string>
+    <string name="title_activity_main">Ploop Climb</string>
+    <string name="package_name">com.simonecislaghi.ploopclimb</string>
+    <string name="custom_url_scheme">com.simonecislaghi.ploopclimb</string>
+    <!-- Google public test App ID — swap for the real AdMob App ID at publish time -->
+    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
+</resources>

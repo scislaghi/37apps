@@ -1,0 +1,12 @@
+- generic [ref=e3]:
+  - generic [ref=e163]:
+    - generic [ref=e164]:
+      - text: SCORE
+      - generic [ref=e165]: "0"
+    - generic [ref=e166]: 29.4s
+  - generic [ref=e169]:
+    - generic [ref=e170]: orthogonal
+    - generic [ref=e183]: horizontal only
+    - generic [ref=e192]: vertical only
+    - generic [ref=e201]: diagonal only
+    - generic [ref=e218]: omnidirectional

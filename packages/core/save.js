@@ -1,6 +1,9 @@
 import { Preferences } from '@capacitor/preferences';
 
-/** One local best-score store per game, keyed by a unique storage key. */
+/**
+ * One local best-score store per game, keyed by a unique storage key.
+ * @param {string} key
+ */
 export function createBestScoreStore(key) {
   return {
     async loadBestScore() {

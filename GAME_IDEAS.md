@@ -7,15 +7,27 @@
 
 ## In development
 
-### Ploop Chess — game #1
-- **Family**: simple puzzles
-- **Mechanic**: move a chess-like piece on a 7×7 grid, capturing enemy
-  pieces before a countdown timer runs out; each piece type moves in a
-  different set of directions (orthogonal, diagonal, all-directions).
-- **Twist**: your own piece's move type changes randomly every 3 captures,
-  forcing you to re-read the board; capturing adds time back to the clock.
-- **Status**: working prototype exists (plain React/DOM), being wrapped as
-  the first real Capacitor app.
+### Ploop Hunt — game #1
+- **Family**: simple puzzles / predator-prey
+- **Mechanic**: move an omnidirectional piece on a 7×7 grid, capturing enemy
+  pieces before a countdown timer runs out; each enemy type slides in a
+  different set of directions (orthogonal, horizontal/vertical-only,
+  diagonal, omnidirectional), shown via a colored arrow-burst glyph instead
+  of a text character.
+- **Twist**: it's turn-based now, not a static puzzle — every move you make,
+  the enemy nearest to you takes a chase move of its own (telegraphed with a
+  brief pulse before it slides); land on your square and it's game over.
+  Capturing adds time back to the clock and spawns a replacement enemy
+  guaranteed to *not* threaten you on its first move. No move-hint overlays
+  on the board — you read the piece types and the position yourself.
+- **Status**: renamed from "Ploop Chess" and reworked end-to-end (new name,
+  icon-based pieces, hint-free board, enemy chase AI, safe-spawn logic,
+  slide/telegraph/capture/spawn animations, procedural SFX via
+  `@37apps/core/audio.js`) after a full design pass; native iOS/Android
+  bundle id and package also renamed to `com.simonecislaghi.ploophunt`.
+  Verified end-to-end in a real browser via the Playwright CLI skill
+  (move, capture, safe-spawn placement, chase-and-catch death, timeout
+  death, denied-tap feedback all confirmed working).
 
 ### Morph — game #2
 - **Family**: endless runners
@@ -36,6 +48,20 @@
   fill, bouncy overshoot morph transition, idle squash/stretch wobble,
   eyes), and obstacles/background now cycle through the full brand accent
   palette instead of a single neutral tone.
+- Reworked again into a pseudo-3D forward runner (gates rush toward the
+  camera down a perspective road instead of scrolling vertically), ported
+  from a revised canvas prototype and rebuilt in DOM/inline-style (CSS
+  `clip-path` road, per-frame projected gate walls) like every other game.
+  Fixed two realism/feel bugs found in that prototype: gate openings are
+  now always flush with the road surface for every shape (previously only
+  the tall gate's opening reached the floor; the cube/wide openings floated
+  above it, making the grounded jelly appear to "hop" to enter them), and
+  the jarring full-screen white flash on every successful pass was replaced
+  with a small localized glow so passing through a gate never reads as a
+  hitch. Core loop verified in a real browser via Playwright (correct
+  passes on both drag directions, wrong-shape death, retry). Still cycles
+  the full accent palette per gate; AdMob + save wired the same way as
+  every other game.
 
 ### Pulse — game #3
 - **Family**: tap games
@@ -78,6 +104,43 @@
   game was fine, the test's tap cadence was the issue). AdMob + save wired
   the same way as the other games. Accent: Signal Coral, per the original
   brand kit mockup.
+
+### Swipe — game #6
+- **Family**: tap games
+- **Mechanic**: a vertical stack of hexagons, each carrying a directional
+  arrow; swipe (or tap left/right) to match the arrow before a 30s countdown
+  runs out. Correct swipes refill the clock and build a streak.
+- **Twist**: some hexagons are marked as traps (chance grows with progress,
+  capped at 32%) — the correct swipe for those is the *opposite* of the
+  arrow shown, forcing constant re-reading instead of pure reflex.
+- **Status**: built (React + Vite + Capacitor) from an existing canvas
+  prototype, rebuilt as DOM/inline-style like every other game and wired
+  onto `@37apps/core` (ads, save, ScoreHeader/StartScreen/GameOverCard)
+  from the start. Core loop verified via Playwright (25-swipe correct
+  streak with live timer refill, deliberate wrong swipe ending the run,
+  tap-to-retry). Accent: Cobalt Bright; hex tiles cycle the full 8-color
+  brand palette (Morph-style), which doubles as the game's signature motif.
+
+### Ploop Climb — game #7
+- **Family**: physics games
+- **Mechanic**: an isometric endless climber — hop diagonally left/right up
+  a brick-offset grid of blocks. Trees block a step without ending the run;
+  spikes, crumbling rock and gaps are deadly. A collapse rises from below
+  and ends the run if it catches the climber.
+- **Twist**: obstacle density and collapse speed both scale with altitude,
+  and row generation guarantees every column always has at least one
+  reachable non-deadly diagonal (no cheap forced deaths) — pressure comes
+  from the chase, not from unfair terrain.
+- **Status**: built (React + Vite + Capacitor) from an existing canvas
+  prototype, rebuilt as DOM/inline-style isometric blocks (CSS `clip-path`
+  per face) like every other game, wired onto `@37apps/core` from the
+  start. Core loop verified via Playwright: normal climbing progress,
+  tree-bump without death, hazard-landing death ("You slipped!"),
+  collapse-catch death ("Buried in rubble!") at the expected ~29s timing,
+  NEW BEST, and tap-to-retry. Accent: Volt Lime for the world/UI, a
+  contrasting Cobalt-jacketed climber sprite so the player never blends
+  into the terrain. Signature motif: the living sky + rising collapse the
+  climber is chased through.
 
 ## Backlog
 

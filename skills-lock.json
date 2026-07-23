@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "skills": {
+    "balance-check": {
+      "source": "donchitos/claude-code-game-studios",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/balance-check/SKILL.md",
+      "computedHash": "94d2a3151a760c34b5f156aa5ad8967da8df8333bfdeea17253490d5fcf52bdf"
+    },
+    "brainstorm": {
+      "source": "donchitos/claude-code-game-studios",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/brainstorm/SKILL.md",
+      "computedHash": "0a7125ce7dc68bcf2a9a93ae88e1c02f23427caf0b69fb6c3b8d4ebb61c39212"
+    },
+    "design-game": {
+      "source": "opusgamelabs/game-creator",
+      "sourceType": "github",
+      "skillPath": "skills/design-game/SKILL.md",
+      "computedHash": "ed3c4269349d9119f081725a02e76f3079b45e92615c366eddf86af0cbeaf0f2"
+    },
+    "game-architecture": {
+      "source": "opusgamelabs/game-creator",
+      "sourceType": "github",
+      "skillPath": "skills/game-architecture/SKILL.md",
+      "computedHash": "319d2befd2e7d11e484450c49244c91999695a4b66282e553e40ecdf1a558d31"
+    },
+    "game-audio": {
+      "source": "opusgamelabs/game-creator",
+      "sourceType": "github",
+      "skillPath": "skills/game-audio/SKILL.md",
+      "computedHash": "6375c20972b4c59831ea21be26136851738f46f7902e1bcbba9e350806dd81b3"
+    },
+    "game-design-core": {
+      "source": "omer-metin/skills-for-antigravity",
+      "sourceType": "github",
+      "skillPath": "skills/game-design-core/SKILL.md",
+      "computedHash": "63dbf2110d16745f999fd67061571f891e3ed7a7de24e355b5dd0abf845ea0a6"
+    },
+    "game-designer": {
+      "source": "opusgamelabs/game-creator",
+      "sourceType": "github",
+      "skillPath": "skills/game-designer/SKILL.md",
+      "computedHash": "051d3e1e033f0beffeaef7a82af944d23102ef82fc6606aca4064f1100be95b7"
+    },
+    "game-ui-design": {
+      "source": "omer-metin/skills-for-antigravity",
+      "sourceType": "github",
+      "skillPath": "skills/game-ui-design/SKILL.md",
+      "computedHash": "cff8acaf58f3f4255f76fb962775fb1a2fec1fce49a54a50bde2c1efd5eb33ec"
+    },
+    "playwright": {
+      "source": "openai/skills",
+      "sourceType": "github",
+      "skillPath": "skills/.curated/playwright/SKILL.md",
+      "computedHash": "595a334de3bd5335f442a33d1bdefb01207c88c99fe43e3bd99b0d5435f230de"
+    },
+    "react-spring-physics": {
+      "source": "freshtechbro/claudedesignskills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/react-spring-physics/SKILL.md",
+      "computedHash": "df2dd730f887868d8586ce94b503ef10cf1a4538651705ecd23be878017ca5de"
+    }
+  }
+}
