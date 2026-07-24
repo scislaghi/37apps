@@ -1,14 +1,17 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { animated } from "@react-spring/web";
 import { initAds, showInterstitial } from "@37apps/core/ads.js";
+import { AD_IDS } from "./adIds.js";
 import { createBestScoreStore } from "@37apps/core/save.js";
 import { baseTheme, fontUI, fontDisplay, ACCENTS } from "@37apps/core/theme.js";
 import { initAudio, sfx } from "@37apps/core/audio.js";
+import { initHaptics } from "@37apps/core/haptics.js";
 import { useScorePop } from "@37apps/core/animation.js";
 import StartScreen from "@37apps/core/components/StartScreen.jsx";
 import GameOverCard from "@37apps/core/components/GameOverCard.jsx";
+import SettingsScreen from "@37apps/core/components/SettingsScreen.jsx";
 
-const { loadBestScore, saveBestScore } = createBestScoreStore("ploophunt.bestScore");
+const { loadBestScore, saveBestScore, resetBestScore } = createBestScoreStore("ploophunt.bestScore");
 
 const N = 7;
 const PLAYER_TYPE = "✱";
@@ -157,13 +160,14 @@ export default function PloopHunt() {
     setBest(b => Math.max(b, finalScore));
     setDeathReason(reason);
     setPhase("dead");
-    showInterstitial();
+    showInterstitial(AD_IDS);
   }, []);
 
   /* ── ads + audio: init once on mount ── */
   useEffect(() => {
-    initAds();
+    initAds(AD_IDS);
     initAudio();
+    initHaptics();
   }, []);
 
   /* ── best score: load once on mount, persist on every change after that ── */
@@ -312,7 +316,7 @@ export default function PloopHunt() {
 
   return (
     <div
-      onPointerDown={() => { if (phase !== "play") startGame(); }}
+      onPointerDown={() => { if (phase === "start" || phase === "dead") startGame(); }}
       style={{
       minHeight: "100vh", display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center",
@@ -503,18 +507,15 @@ export default function PloopHunt() {
       {/* ── START SCREEN ── */}
       {phase === "start" && (
         <StartScreen
-          /* fixed dark scrim behind this screen (unrelated to base theme), so its
-             text needs the light pair rather than the page's light-theme dark ink */
-          theme={{ ...palette, text: "#F5F3F0", textMuted: "#9A98A6" }}
-          background="rgba(21,20,27,0.96)"
+          accent={palette.accent}
           title={<>
-            <div style={{ fontSize: 48, fontWeight: 900, color: "#F5F3F0", marginBottom: 4, fontFamily: fontDisplay }}>PLOOP</div>
-            <div style={{ fontSize: 24, fontWeight: 300, color: "#9A98A6", letterSpacing: 4, fontFamily: fontDisplay }}>HUNT</div>
+            <div style={{ fontSize: 48, fontWeight: 900, color: baseTheme.text, marginBottom: 4, fontFamily: fontDisplay }}>PLOOP</div>
+            <div style={{ fontSize: 24, fontWeight: 300, color: baseTheme.textMuted, letterSpacing: 4, fontFamily: fontDisplay }}>HUNT</div>
           </>}
           preview={
             <div style={{
               background: palette.panelBg, borderRadius: 14, padding: "16px 24px",
-              boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
+              boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
               display: "flex", flexDirection: "column", gap: 8, minWidth: 220,
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, paddingBottom: 6, borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
@@ -538,17 +539,22 @@ export default function PloopHunt() {
           }
           description="Capture enemy pieces before the timer runs out. Every move you make, the nearest enemy hunts back — let one land on you and it's over. No move hints: read the board yourself."
           best={best}
+          onPlay={startGame}
+          onSettings={() => setPhase("settings")}
         />
       )}
 
       {/* ── GAME OVER ── */}
       {phase === "dead" && (
-        <GameOverCard
-          theme={palette}
-          title={deathTitle}
-          score={score}
-          best={best}
-          accentColor={palette.accent}
+        <GameOverCard accent={palette.accent} title={deathTitle} score={score} best={best} onRetry={startGame} />
+      )}
+
+      {/* ── SETTINGS ── */}
+      {phase === "settings" && (
+        <SettingsScreen
+          accent={palette.accent}
+          onBack={() => setPhase("start")}
+          onResetProgress={() => { resetBestScore(); setBest(0); }}
         />
       )}
 

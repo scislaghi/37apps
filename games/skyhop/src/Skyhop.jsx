@@ -1,13 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { initAds, showInterstitial } from "@37apps/core/ads.js";
+import { initAds, showInterstitial, showRewarded, isRewardedReady, isNativeAdPlatform } from "@37apps/core/ads.js";
+import { AD_IDS } from "./adIds.js";
 import { initAudio, sfx } from "@37apps/core/audio.js";
+import { initHaptics } from "@37apps/core/haptics.js";
 import { createBestScoreStore } from "@37apps/core/save.js";
 import { baseTheme, fontUI, fontDisplay } from "@37apps/core/theme.js";
 import ScoreHeader from "@37apps/core/components/ScoreHeader.jsx";
 import StartScreen from "@37apps/core/components/StartScreen.jsx";
 import GameOverCard from "@37apps/core/components/GameOverCard.jsx";
+import SettingsScreen from "@37apps/core/components/SettingsScreen.jsx";
 
-const { loadBestScore, saveBestScore } = createBestScoreStore("skyhop.bestScore");
+const { loadBestScore, saveBestScore, resetBestScore } = createBestScoreStore("skyhop.bestScore");
 
 /* ── 37apps brand kit: light neutral base + Signal Coral accent ── */
 const palette = {
@@ -65,10 +68,12 @@ export default function Skyhop() {
   const spawnCursorRef = useRef(0);
   const bestLoadedRef = useRef(false);
   const rafRef = useRef(null);
+  const continueUsedRef = useRef(false);
 
   useEffect(() => {
-    initAds();
+    initAds(AD_IDS);
     initAudio();
+    initHaptics();
   }, []);
 
   useEffect(() => {
@@ -83,13 +88,27 @@ export default function Skyhop() {
     saveBestScore(best);
   }, [best]);
 
+  /* ── interstitial fires on give-up (RETRY / tap-to-restart), not on death
+     itself — that way a player offered a rewarded continue only ever sees
+     one ad, not a forced interstitial immediately followed by a rewarded-ad
+     prompt. ── */
   const endGame = useCallback(() => {
-    setPhase(p => {
-      if (p !== "play") return p;
-      showInterstitial();
-      return "dead";
-    });
+    setPhase(p => (p === "play" ? "dead" : p));
     setBest(b => (scoreRef.current > b ? scoreRef.current : b));
+  }, []);
+
+  const handleWatchAdContinue = useCallback(async () => {
+    const reward = await showRewarded(AD_IDS);
+    if (!reward) return false;
+    continueUsedRef.current = true;
+    velocityRef.current = 0;
+    const trackHeight = trackRef.current ? trackRef.current.clientHeight : 640;
+    playerYRef.current = trackHeight / 2;
+    /* clear pipes near the player so reviving doesn't drop them straight
+       back into the pipe that just killed them */
+    pipesRef.current = pipesRef.current.filter(p => p.x < PLAYER_X - 160 || p.x > PLAYER_X + 320);
+    setPhase("play");
+    return true;
   }, []);
 
   /* ── main loop ── */
@@ -168,18 +187,29 @@ export default function Skyhop() {
     velocityRef.current = 0;
     scoreRef.current = 0;
     spawnCursorRef.current = SPAWN_GAP_X - 200;
+    continueUsedRef.current = false;
     setScore(0);
     setPhase("play");
   }, []);
 
+  const handleRetry = useCallback(() => {
+    showInterstitial(AD_IDS);
+    startGame();
+  }, [startGame]);
+
   const handleTap = useCallback(() => {
-    if (phase !== "play") {
+    if (phase === "start") {
       startGame();
       return;
     }
+    if (phase === "dead") {
+      handleRetry();
+      return;
+    }
+    if (phase !== "play") return;
     velocityRef.current = FLAP_VELOCITY;
     sfx.tap();
-  }, [phase, startGame]);
+  }, [phase, startGame, handleRetry]);
 
   const pipes = pipesRef.current;
   const playerY = playerYRef.current;
@@ -234,7 +264,7 @@ export default function Skyhop() {
         {/* ── START ── */}
         {phase === "start" && (
           <StartScreen
-            theme={palette}
+            accent={palette.player}
             title="SKYHOP"
             preview={
               <div style={{
@@ -244,12 +274,34 @@ export default function Skyhop() {
             }
             description="Tap to flap and dodge the gaps. Gaps get tighter — and tilt — as your score climbs."
             best={best}
+            onPlay={startGame}
+            onSettings={() => setPhase("settings")}
           />
         )}
 
         {/* ── GAME OVER ── */}
         {phase === "dead" && (
-          <GameOverCard theme={palette} title="Crashed!" score={score} best={best} accentColor={palette.player} />
+          <GameOverCard
+            accent={palette.player}
+            title="Crashed!"
+            score={score}
+            best={best}
+            onRetry={handleRetry}
+            onWatchAdContinue={
+              !continueUsedRef.current && isNativeAdPlatform() && isRewardedReady()
+                ? handleWatchAdContinue
+                : undefined
+            }
+          />
+        )}
+
+        {/* ── SETTINGS ── */}
+        {phase === "settings" && (
+          <SettingsScreen
+            accent={palette.player}
+            onBack={() => setPhase("start")}
+            onResetProgress={() => { resetBestScore(); setBest(0); }}
+          />
         )}
       </div>
     </div>

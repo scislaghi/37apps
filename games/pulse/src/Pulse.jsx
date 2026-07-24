@@ -1,12 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { initAds, showInterstitial } from "@37apps/core/ads.js";
+import { AD_IDS } from "./adIds.js";
+import { initHaptics } from "@37apps/core/haptics.js";
 import { createBestScoreStore } from "@37apps/core/save.js";
 import { baseTheme, fontUI, fontDisplay } from "@37apps/core/theme.js";
 import ScoreHeader from "@37apps/core/components/ScoreHeader.jsx";
 import StartScreen from "@37apps/core/components/StartScreen.jsx";
 import GameOverCard from "@37apps/core/components/GameOverCard.jsx";
+import SettingsScreen from "@37apps/core/components/SettingsScreen.jsx";
 
-const { loadBestScore, saveBestScore } = createBestScoreStore("pulse.bestScore");
+const { loadBestScore, saveBestScore, resetBestScore } = createBestScoreStore("pulse.bestScore");
 
 /* ── 37apps brand kit: light neutral base + Amber Pulse accent ── */
 const palette = {
@@ -20,6 +23,10 @@ const palette = {
   markerGlow: "rgba(255,163,26,0.55)",
   danger: "#FF4529",
 };
+
+/* Pulse's fixed brand accent (Jade Flash) — drives PLAY/RETRY buttons and the
+   Settings toggles; same hex already used for the "perfect" zone highlight. */
+const ACCENT = palette.perfect;
 
 const BAR_WIDTH = 280;
 const MARKER_SIZE = 20;
@@ -68,7 +75,8 @@ export default function Pulse() {
   const flashTimeoutRef = useRef(null);
 
   useEffect(() => {
-    initAds();
+    initAds(AD_IDS);
+    initHaptics();
   }, []);
 
   useEffect(() => {
@@ -86,7 +94,7 @@ export default function Pulse() {
   const endGame = useCallback(() => {
     setPhase(p => {
       if (p !== "play") return p;
-      showInterstitial();
+      showInterstitial(AD_IDS);
       return "dead";
     });
     setBest(b => (scoreRef.current > b ? scoreRef.current : b));
@@ -131,10 +139,13 @@ export default function Pulse() {
   }, []);
 
   const handleTap = useCallback(() => {
-    if (phase !== "play") {
+    /* menu/game-over background tap = play again; settings has its own buttons
+       (which stopPropagation) and must never fall through to this */
+    if (phase === "start" || phase === "dead") {
       startGame();
       return;
     }
+    if (phase !== "play") return;
     const now = performance.now();
     if (now < frozenUntilRef.current) return;
 
@@ -244,7 +255,7 @@ export default function Pulse() {
         {/* ── START ── */}
         {phase === "start" && (
           <StartScreen
-            theme={palette}
+            accent={ACCENT}
             title="PULSE"
             preview={
               <div style={{ position: "relative", width: 220, height: 30 }}>
@@ -267,12 +278,23 @@ export default function Pulse() {
             }
             description="Tap when the marker is inside the zone. Land dead center for a PERFECT — chain perfects for a streak bonus. Miss the zone and it's over."
             best={best}
+            onPlay={startGame}
+            onSettings={() => setPhase("settings")}
           />
         )}
 
         {/* ── GAME OVER ── */}
         {phase === "dead" && (
-          <GameOverCard theme={palette} title="Missed it!" score={score} best={best} accentColor={palette.perfect} />
+          <GameOverCard accent={ACCENT} title="Missed it!" score={score} best={best} onRetry={startGame} />
+        )}
+
+        {/* ── SETTINGS ── */}
+        {phase === "settings" && (
+          <SettingsScreen
+            accent={ACCENT}
+            onBack={() => setPhase("start")}
+            onResetProgress={() => { resetBestScore(); setBest(0); }}
+          />
         )}
       </div>
 

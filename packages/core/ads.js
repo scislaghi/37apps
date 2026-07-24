@@ -1,35 +1,57 @@
-import { AdMob, BannerAdSize, BannerAdPosition, BannerAdPluginEvents, InterstitialAdPluginEvents, AdmobConsentStatus } from '@capacitor-community/admob';
+import { AdMob, BannerAdSize, BannerAdPosition, BannerAdPluginEvents, InterstitialAdPluginEvents, RewardAdPluginEvents, AdmobConsentStatus } from '@capacitor-community/admob';
 import { Capacitor } from '@capacitor/core';
 
 /**
  * Google's public test ad unit IDs — safe to ship during development, show
  * placeholder test creatives, and never generate real revenue or account
- * strikes. Pass real per-game { bannerId, interstitialId } once a game is
- * registered as its own app inside the shared 37apps AdMob account (see
- * plan.md, section 3) — no other code changes needed.
+ * strikes. Pass a real per-platform `AdIds` (see the shape below) once a
+ * game is registered as its own app inside the shared 37apps AdMob account
+ * — no other code changes needed.
  */
 const TEST_IDS = {
   android: {
     banner: 'ca-app-pub-3940256099942544/6300978111',
     interstitial: 'ca-app-pub-3940256099942544/1033173712',
+    rewarded: 'ca-app-pub-3940256099942544/5224354917',
   },
   ios: {
     banner: 'ca-app-pub-3940256099942544/2934735716',
     interstitial: 'ca-app-pub-3940256099942544/4411468910',
+    rewarded: 'ca-app-pub-3940256099942544/1712485313',
   },
 };
 
-/** @typedef {{ bannerId?: string, interstitialId?: string }} AdIds */
+/**
+ * @typedef {{ banner?: string, interstitial?: string, rewarded?: string }} PlatformAdIds
+ * @typedef {{ android?: PlatformAdIds, ios?: PlatformAdIds }} AdIds
+ */
 
 /** @param {AdIds} [overrides] */
 function resolveIds(overrides) {
   const platform = Capacitor.getPlatform();
   const defaults = TEST_IDS[platform] || TEST_IDS.android;
+  const custom = overrides?.[platform];
   return {
-    banner: overrides?.bannerId || defaults.banner,
-    interstitial: overrides?.interstitialId || defaults.interstitial,
+    banner: custom?.banner || defaults.banner,
+    interstitial: custom?.interstitial || defaults.interstitial,
+    rewarded: custom?.rewarded || defaults.rewarded,
   };
 }
+
+/** True on-device (iOS/Android); false in the browser, where no banner ever shows. */
+export function isNativeAdPlatform() {
+  return Capacitor.isNativePlatform();
+}
+
+/**
+ * Reserved space for the bottom adaptive banner on native platforms. The
+ * plugin doesn't hand back the real banner height synchronously before it
+ * loads, so this is a fixed, generous estimate (adaptive banners run
+ * roughly 50-90dp depending on device width) — used as bottom padding on
+ * any screen with tappable UI near the bottom edge, so the native banner
+ * never covers a button. Combine with env(safe-area-inset-bottom).
+ */
+export const BANNER_SAFE_BOTTOM = 64;
 
 let interstitialReady = false;
 
@@ -84,6 +106,7 @@ export async function initAds(ids) {
 
   await showBanner(ids);
   await prepareInterstitial(ids);
+  await prepareRewarded(ids);
 }
 
 /** @param {AdIds} [ids] */
@@ -114,4 +137,58 @@ export async function showInterstitial(ids) {
   if (!interstitialReady) return;
   await AdMob.showInterstitial();
   await prepareInterstitial(ids);
+}
+
+let rewardedReady = false;
+
+AdMob.addListener(RewardAdPluginEvents.Loaded, () => {
+  rewardedReady = true;
+});
+AdMob.addListener(RewardAdPluginEvents.FailedToLoad, (info) => {
+  rewardedReady = false;
+  console.error('[ads] rewarded ad failed to load:', info);
+});
+
+/** @param {AdIds} [ids] */
+export async function prepareRewarded(ids) {
+  if (!Capacitor.isNativePlatform()) return;
+  rewardedReady = false;
+  await AdMob.prepareRewardVideoAd({ adId: resolveIds(ids).rewarded });
+}
+
+/** True once a prepared rewarded ad is loaded and safe to offer to the player. */
+export function isRewardedReady() {
+  return rewardedReady;
+}
+
+/**
+ * Shows the rewarded ad and resolves with the reward once the player earns
+ * it, or `null` if it wasn't ready, failed, or was dismissed before
+ * completion (closed early — no reward). Callers must treat `null` as "no
+ * reward" and never grant the continue/bonus speculatively before this
+ * resolves. Always re-prepares the next one afterwards so it's ready next
+ * time the player reaches this screen.
+ * @param {AdIds} [ids]
+ */
+export async function showRewarded(ids) {
+  if (!Capacitor.isNativePlatform() || !rewardedReady) return null;
+
+  const reward = await new Promise((resolve) => {
+    let settled = false;
+    const rewardedHandle = AdMob.addListener(RewardAdPluginEvents.Rewarded, (item) => {
+      settled = true;
+      resolve(item);
+    });
+    const dismissedHandle = AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
+      if (!settled) resolve(null);
+    });
+    AdMob.showRewardVideoAd().finally(() => {
+      Promise.all([rewardedHandle, dismissedHandle]).then((handles) => {
+        handles.forEach((h) => h.remove());
+      });
+    });
+  });
+
+  await prepareRewarded(ids);
+  return reward;
 }

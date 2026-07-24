@@ -14,5 +14,8 @@ export function createBestScoreStore(key) {
     async saveBestScore(score) {
       await Preferences.set({ key, value: String(score) });
     },
+    async resetBestScore() {
+      await Preferences.remove({ key });
+    },
   };
 }

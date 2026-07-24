@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { initAds, showInterstitial } from "@37apps/core/ads.js";
+import { AD_IDS } from "./adIds.js";
 import { createBestScoreStore } from "@37apps/core/save.js";
 import { baseTheme, fontUI, ACCENTS } from "@37apps/core/theme.js";
 import ScoreHeader from "@37apps/core/components/ScoreHeader.jsx";
 import StartScreen from "@37apps/core/components/StartScreen.jsx";
 import GameOverCard from "@37apps/core/components/GameOverCard.jsx";
+import SettingsScreen from "@37apps/core/components/SettingsScreen.jsx";
 
-const { loadBestScore, saveBestScore } = createBestScoreStore("swipe.bestScore");
+const { loadBestScore, saveBestScore, resetBestScore } = createBestScoreStore("swipe.bestScore");
 
 /* ── 37apps brand kit: light neutral base + Cobalt Bright accent. Hex tiles cycle the full accent palette. ── */
 const palette = {
@@ -113,7 +115,7 @@ export default function Swipe() {
   const rafRef = useRef(null);
 
   useEffect(() => {
-    initAds();
+    initAds(AD_IDS);
   }, []);
 
   useEffect(() => {
@@ -138,7 +140,7 @@ export default function Swipe() {
     setDeathReason(reason);
     setPhase(p => {
       if (p !== "play") return p;
-      showInterstitial();
+      showInterstitial(AD_IDS);
       return "dead";
     });
     setBest(b => (scoreRef.current > b ? scoreRef.current : b));
@@ -212,10 +214,13 @@ export default function Swipe() {
   }, [flyaways]);
 
   const handlePointerDown = useCallback((e) => {
-    if (phase !== "play") {
+    /* menu/game-over background tap = play again; settings has its own buttons
+       (which stopPropagation) and must never fall through to this */
+    if (phase === "start" || phase === "dead") {
       startGame();
       return;
     }
+    if (phase !== "play") return;
     pointerRef.current = { x: e.clientX, y: e.clientY };
   }, [phase, startGame]);
 
@@ -313,7 +318,7 @@ export default function Swipe() {
 
         {phase === "start" && (
           <StartScreen
-            theme={palette}
+            accent={palette.accent}
             title="SWIPE"
             preview={
               <div style={{ display: "flex", gap: 24 }}>
@@ -329,16 +334,26 @@ export default function Swipe() {
             }
             description="Swipe the direction of the arrow. Hex marked with ⚠ flips it — swipe the opposite way. Chain correct swipes to keep the clock alive."
             best={best}
+            onPlay={startGame}
+            onSettings={() => setPhase("settings")}
           />
         )}
 
         {phase === "dead" && (
           <GameOverCard
-            theme={palette}
+            accent={palette.accent}
             title={deathReason === "time" ? "Time's up!" : "Wrong swipe!"}
             score={score}
             best={best}
-            accentColor={palette.accent}
+            onRetry={startGame}
+          />
+        )}
+
+        {phase === "settings" && (
+          <SettingsScreen
+            accent={palette.accent}
+            onBack={() => setPhase("start")}
+            onResetProgress={() => { resetBestScore(); setBest(0); }}
           />
         )}
       </div>

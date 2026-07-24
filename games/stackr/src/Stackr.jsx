@@ -1,12 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { initAds, showInterstitial } from "@37apps/core/ads.js";
+import { AD_IDS } from "./adIds.js";
+import { initHaptics } from "@37apps/core/haptics.js";
 import { createBestScoreStore } from "@37apps/core/save.js";
 import { baseTheme, fontUI, fontDisplay } from "@37apps/core/theme.js";
 import ScoreHeader from "@37apps/core/components/ScoreHeader.jsx";
 import StartScreen from "@37apps/core/components/StartScreen.jsx";
 import GameOverCard from "@37apps/core/components/GameOverCard.jsx";
+import SettingsScreen from "@37apps/core/components/SettingsScreen.jsx";
 
-const { loadBestScore, saveBestScore } = createBestScoreStore("stackr.bestScore");
+const { loadBestScore, saveBestScore, resetBestScore } = createBestScoreStore("stackr.bestScore");
 
 /* ── 37apps brand kit: light neutral base + Jade Flash accent ── */
 const palette = {
@@ -18,6 +21,9 @@ const palette = {
   perfect: "#FFA31A",
   danger: "#FF4529",
 };
+
+/* Stackr's fixed brand accent (Jade Flash) — same hex as the tower blocks. */
+const ACCENT = palette.block;
 
 const BLOCK_HEIGHT = 36;
 const BASE_WIDTH = 200;
@@ -55,7 +61,8 @@ export default function Stackr() {
   const flashTimeoutRef = useRef(null);
 
   useEffect(() => {
-    initAds();
+    initAds(AD_IDS);
+    initHaptics();
   }, []);
 
   useEffect(() => {
@@ -73,7 +80,7 @@ export default function Stackr() {
   const endGame = useCallback(() => {
     setPhase(p => {
       if (p !== "play") return p;
-      showInterstitial();
+      showInterstitial(AD_IDS);
       return "dead";
     });
     setBest(b => (scoreRef.current > b ? scoreRef.current : b));
@@ -116,10 +123,13 @@ export default function Stackr() {
   }, []);
 
   const handleTap = useCallback(() => {
-    if (phase !== "play") {
+    /* menu/game-over background tap = play again; settings has its own buttons
+       (which stopPropagation) and must never fall through to this */
+    if (phase === "start" || phase === "dead") {
       startGame();
       return;
     }
+    if (phase !== "play") return;
 
     const gameWidth = trackRef.current ? trackRef.current.clientWidth : 360;
     const width = currentWidthRef.current;
@@ -252,7 +262,7 @@ export default function Stackr() {
         {/* ── START ── */}
         {phase === "start" && (
           <StartScreen
-            theme={palette}
+            accent={ACCENT}
             title="STACKR"
             preview={
               <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "center" }}>
@@ -263,12 +273,23 @@ export default function Stackr() {
             }
             description="Tap to drop the block onto the tower. Overhang gets cut off — land dead center for a PERFECT and keep full width. Miss completely and the tower falls."
             best={best}
+            onPlay={startGame}
+            onSettings={() => setPhase("settings")}
           />
         )}
 
         {/* ── GAME OVER ── */}
         {phase === "dead" && (
-          <GameOverCard theme={palette} title="Tower down!" score={score} best={best} accentColor={palette.block} />
+          <GameOverCard accent={ACCENT} title="Tower down!" score={score} best={best} onRetry={startGame} />
+        )}
+
+        {/* ── SETTINGS ── */}
+        {phase === "settings" && (
+          <SettingsScreen
+            accent={ACCENT}
+            onBack={() => setPhase("start")}
+            onResetProgress={() => { resetBestScore(); setBest(0); }}
+          />
         )}
       </div>
 
