@@ -1,4 +1,4 @@
-package com.simonecislaghi.morph;
+package com.simonecislaghi.morphy;
 
 import com.getcapacitor.BridgeActivity;
 

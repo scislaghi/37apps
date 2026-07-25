@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "com.simonecislaghi.morph"
+    namespace = "com.simonecislaghi.morphy"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.simonecislaghi.morph"
+        applicationId "com.simonecislaghi.morphy"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

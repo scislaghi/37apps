@@ -7,8 +7,7 @@
 	<key>GADIsAdManagerApp</key>
 	<true/>
 	<key>GADApplicationIdentifier</key>
-	<!-- Google public test App ID — swap for the real AdMob App ID at publish time -->
-	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<string>ca-app-pub-2237841579285839~9420110857</string>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>
@@ -18,10 +17,12 @@
 	</array>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>This identifier is used to show you relevant ads.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>Morph</string>
+        <string>Morphy</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

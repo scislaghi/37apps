@@ -43,7 +43,17 @@ export default function StartScreen({ accent, title, preview, description, best,
           color: baseTheme.textMuted, cursor: "pointer", zIndex: 11,
         }}
       >
-        {muted ? "🔇" : "🔊"}
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" stroke="none" />
+          {muted ? (
+            <path d="M16 9l5 6M21 9l-5 6" />
+          ) : (
+            <>
+              <path d="M15.5 8.5a4.5 4.5 0 0 1 0 7" />
+              <path d="M18 6a8 8 0 0 1 0 12" />
+            </>
+          )}
+        </svg>
       </button>
 
       <div style={{ fontSize: 46, fontWeight: 900, color: baseTheme.text, marginBottom: 28, fontFamily: fontDisplay, letterSpacing: -1 }}>
@@ -71,7 +81,7 @@ export default function StartScreen({ accent, title, preview, description, best,
         onClick={onPlay}
         style={{
           width: 220, border: "none", borderRadius: 16, padding: "16px 0", marginBottom: 10,
-          background: accent, color: baseTheme.text, fontFamily: fontDisplay, fontWeight: 800,
+          background: accent, color: "#FFFFFF", fontFamily: fontDisplay, fontWeight: 800,
           fontSize: 15, letterSpacing: "0.03em", cursor: "pointer",
           animation: "startPulse 1.8s ease-in-out infinite",
         }}

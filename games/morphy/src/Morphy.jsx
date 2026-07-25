@@ -10,10 +10,11 @@ import StartScreen from "@37apps/core/components/StartScreen.jsx";
 import GameOverCard from "@37apps/core/components/GameOverCard.jsx";
 import SettingsScreen from "@37apps/core/components/SettingsScreen.jsx";
 import Scene3D from "./Scene3D.jsx";
+import morphyIcon from "./assets/morphy-icon.png";
 
-const { loadBestScore, saveBestScore, resetBestScore } = createBestScoreStore("morph.bestScore");
+const { loadBestScore, saveBestScore, resetBestScore } = createBestScoreStore("morphy.bestScore");
 
-/* Morph's fixed brand accent (Violet Spark) — drives PLAY/RETRY buttons and the
+/* Morphy's fixed brand accent (Violet Spark) — drives PLAY/RETRY buttons and the
    Settings toggles; independent of the per-gate accent colors used in-scene. */
 const ACCENT = ACCENTS[6];
 
@@ -73,7 +74,7 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
-export default function Morph() {
+export default function Morphy() {
   const [phase, setPhase] = useState("start");
   const [score, setScore] = useState(0);
   const [best, setBest] = useState(0);
@@ -301,29 +302,16 @@ export default function Morph() {
         {phase === "start" && (
           <StartScreen
             accent={ACCENT}
+            preview={
+              <img src={morphyIcon} alt="" width={84} height={84} style={{
+                borderRadius: 20, boxShadow: "0 8px 24px rgba(24,23,29,0.18)", display: "block",
+              }} />
+            }
             title={
               <span style={{
                 background: PLAYER_GRADIENT, WebkitBackgroundClip: "text", backgroundClip: "text",
                 color: "transparent", filter: "drop-shadow(0 0 20px rgba(123,66,255,0.35))",
-              }}>MORPH</span>
-            }
-            preview={
-              <div style={{ display: "flex", gap: 18 }}>
-                {TYPES.map((t, i) => (
-                  <div key={t} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-                    <div style={{ animation: reducedMotion ? "none" : `previewFloat 2.4s ${1.6 + i * 0.3}s ease-in-out infinite` }}>
-                      <div style={{
-                        width: SHAPES[t].w, height: SHAPES[t].h, borderRadius: SHAPES[t].radius,
-                        background: PLAYER_GRADIENT,
-                        animation: reducedMotion ? "none" : `previewPop 0.5s ${i * 0.12}s both cubic-bezier(0.34, 1.56, 0.64, 1)`,
-                      }} />
-                    </div>
-                    <span style={{ fontSize: 14, color: baseTheme.textMuted, fontWeight: 600 }}>
-                      {t === "cube" ? "hold still" : t === "tall" ? "drag up" : "drag down"}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              }}>MORPHY</span>
             }
             description="Drag up or down to morph your shape and match each gap. Wrong shape on contact ends the run."
             best={best}

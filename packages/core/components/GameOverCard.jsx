@@ -74,7 +74,7 @@ export default function GameOverCard({ accent, title, score, best, onRetry, onWa
           onClick={onRetry}
           style={{
             width: 220, border: "none", borderRadius: 16, padding: "16px 0", marginTop: 32,
-            background: accent, color: baseTheme.text, fontFamily: fontDisplay, fontWeight: 800,
+            background: accent, color: "#FFFFFF", fontFamily: fontDisplay, fontWeight: 800,
             fontSize: 15, letterSpacing: "0.03em", cursor: "pointer",
           }}
         >

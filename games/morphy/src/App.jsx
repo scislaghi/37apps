@@ -1,7 +1,7 @@
-import Morph from './Morph.jsx'
+import Morphy from './Morphy.jsx'
 
 function App() {
-  return <Morph />
+  return <Morphy />
 }
 
 export default App

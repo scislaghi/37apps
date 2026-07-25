@@ -35,9 +35,9 @@ const HOLE3D = {
   wide: { w: 2.16, h: 0.9 },
 };
 
-const ROAD_FAR = 0x17161d;
-const ROAD_NEAR = 0x2a2933;
-const RAIL_COLOR = 0xf5f3f0;
+const ROAD_FAR = 0xf7f5f2;
+const ROAD_NEAR = 0xdad4c6;
+const RAIL_COLOR = 0xffffff;
 const FACE_COLOR = "#18171d";
 
 function makeGradientTexture() {
@@ -103,7 +103,7 @@ function makeDashTexture() {
   const c = document.createElement("canvas");
   c.width = 8; c.height = 128;
   const ctx = c.getContext("2d");
-  ctx.fillStyle = "rgba(245,243,240,0.6)";
+  ctx.fillStyle = "rgba(24,23,29,0.28)";
   ctx.fillRect(0, 0, 8, 56);
   const tex = new THREE.CanvasTexture(c);
   tex.wrapS = THREE.RepeatWrapping;
@@ -145,6 +145,9 @@ const Scene3D = forwardRef(function Scene3D(
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.15;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.domElement.style.display = "block";
+    renderer.domElement.style.width = "100%";
+    renderer.domElement.style.height = "100%";
     mount.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
@@ -159,7 +162,7 @@ const Scene3D = forwardRef(function Scene3D(
        player carry their own emissive materials for "glow," so no per-object point
        lights are needed; keeps the tunnel calm/legible instead of a mess of colored
        light spilling over everything (37apps brand kit: disciplined, not candy-neon). */
-    scene.add(new THREE.HemisphereLight(0x3d5a80, 0x0c0b10, 0.9));
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xb8b2a0, 1.0));
     const key = new THREE.DirectionalLight(0xffffff, 1.0);
     key.position.set(2.5, 6, 4);
     scene.add(key);
