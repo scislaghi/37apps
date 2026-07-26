@@ -1,0 +1,6 @@
+- generic [ref=f7e7]:
+  - button "Mute sound" [ref=f7e8] [cursor=pointer]
+  - generic [ref=f7e13]: MORPHY
+  - generic [ref=f7e15]: Drag up or down to morph your shape and match each gap. Wrong shape on contact ends the run.
+  - button "PLAY" [ref=f7e16] [cursor=pointer]
+  - button "Settings" [ref=f7e17] [cursor=pointer]
