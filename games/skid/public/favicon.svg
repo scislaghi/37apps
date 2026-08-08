@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Brand kit v2 §04: bright accent ground, one dark silhouette on top.
+       Skid's glyph is its mechanic — a ball above the slab it rolls down. -->
+  <rect width="64" height="64" rx="16" fill="#FF297E"/>
+  <path d="M12 30 L30 44" stroke="#18171D" stroke-width="7" stroke-linecap="round"/>
+  <path d="M34 46 L52 34" stroke="#18171D" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="24" cy="20" r="8" fill="#18171D"/>
+</svg>

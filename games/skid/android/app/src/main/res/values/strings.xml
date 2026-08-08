@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Skid</string>
+    <string name="title_activity_main">Skid</string>
+    <string name="package_name">com.simonecislaghi.skid</string>
+    <string name="custom_url_scheme">com.simonecislaghi.skid</string>
+    <!-- Google's public sample AdMob app id: Skid is not registered as its own
+         app in the 37apps AdMob account yet, and the Mobile Ads SDK crashes at
+         launch outright if this meta-data is absent. Swap for the real ~id
+         alongside the unit ids in src/adIds.js. -->
+    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
+</resources>

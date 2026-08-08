@@ -1,0 +1,7 @@
+- generic [ref=f10e5]:
+  - button "Mute sound" [ref=f10e6] [cursor=pointer]
+  - generic [ref=f10e11]: SKID
+  - generic [ref=f10e15]: Roll down an endless shaft. One tap hops the ball — clear the spikes, duck the hanging fangs, dodge the saws, and grab orbs to charge a BLAZE that smashes straight through them.
+  - generic [ref=f10e16]: Best · 507
+  - button "PLAY" [ref=f10e17] [cursor=pointer]
+  - button "Settings" [ref=f10e18] [cursor=pointer]
