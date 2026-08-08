@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <!-- Brand kit v2 §04: bright accent field, dark silhouette on top — contrast
+       is what wins the tap on a store shelf. Volt Lime is Chomp's accent. -->
+  <path fill="#C0E637" d="M0 46C0 20.6 20.6 0 46 0h28c25.4 0 46 20.6 46 46v28c0 25.4-20.6 46-46 46H46C20.6 120 0 99.4 0 74z"/>
+  <g fill="#1F4A11" stroke="#1F4A11" stroke-width="9" stroke-linejoin="round" stroke-linecap="round">
+    <!-- tail -->
+    <path d="M40 72 C25 74 16 65 12 51 C21 56 28 58 37 57 Z"/>
+    <!-- body -->
+    <ellipse cx="60" cy="69" rx="27" ry="19"/>
+    <!-- neck -->
+    <path d="M74 59 C78 44 86 34 96 32 L103 44 C94 47 88 56 85 68 Z"/>
+    <!-- head + snout -->
+    <ellipse cx="99" cy="34" rx="14" ry="11"/>
+    <path d="M105 27 C112 27 115 31 114 36 C113 40 109 42 105 41 Z"/>
+    <!-- legs -->
+    <path d="M50 84 L46 100" stroke-width="14" fill="none"/>
+    <path d="M72 84 L76 100" stroke-width="14" fill="none"/>
+    <!-- back plates: the herbivore tell, kept as part of the one silhouette -->
+    <path d="M44 54 L52 39 L59 53 Z"/>
+    <path d="M59 51 L67 36 L74 50 Z"/>
+  </g>
+  <!-- single eye punched back out in the accent, so the face survives at 60px -->
+  <circle cx="101" cy="31" r="4.6" fill="#EAF9A8"/>
+  <circle cx="102" cy="31.6" r="2.4" fill="#1F4A11"/>
+</svg>

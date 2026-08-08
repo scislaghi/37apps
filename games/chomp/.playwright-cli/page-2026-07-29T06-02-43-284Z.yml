@@ -1,0 +1,11 @@
+- generic [ref=e177]:
+  - button "Mute sound" [ref=e178] [cursor=pointer]
+  - generic [ref=e183]: CHOMP
+  - generic [ref=e217]:
+    - generic [ref=e218]: Eat
+    - generic [ref=e233]: Blocks
+    - generic [ref=e248]: Drowns
+    - generic [ref=e257]: Eats you
+  - generic [ref=e292]: Your dino never stops running — you only point it. Graze the clearing and keep the T-Rex behind you. He leaves the board. He comes back somewhere else.
+  - button "PLAY" [ref=e293] [cursor=pointer]
+  - button "Settings" [ref=e294] [cursor=pointer]
