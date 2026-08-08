@@ -1,0 +1,6 @@
+- generic [ref=e5]:
+  - button "Mute sound" [ref=e6] [cursor=pointer]
+  - generic [ref=e11]: FLICK
+  - generic [ref=e15]: The tower rises. Send every disc to the wall that matches it — tap or swipe left and right — before it hits the line. You have ten seconds, and every good flick buys a little more.
+  - button "PLAY" [ref=e16] [cursor=pointer]
+  - button "Settings" [ref=e17] [cursor=pointer]
