@@ -1,4 +1,4 @@
-package com.simonecislaghi.skyhop;
+package com.simonecislaghi.line;
 
 import com.getcapacitor.BridgeActivity;
 

@@ -1,7 +1,7 @@
-import Skyhop from './Skyhop.jsx'
+import Line from './Line.jsx'
 
 function App() {
-  return <Skyhop />
+  return <Line />
 }
 
 export default App

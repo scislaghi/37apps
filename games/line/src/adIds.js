@@ -1,7 +1,7 @@
 /**
- * Real AdMob ad unit IDs for Skyhop (bundle com.simonecislaghi.skyhop).
+ * Real AdMob ad unit IDs for Line (bundle com.simonecislaghi.line).
  *
- * Fill in after: 1) registering Skyhop as its own app in the shared 37apps
+ * Fill in after: 1) registering Line as its own app in the shared 37apps
  * AdMob account (one Android app entry + one iOS app entry), 2) creating a
  * Banner, Interstitial, and Rewarded ad unit under each. Leave any field
  * empty until you have it — ads.js falls back to Google's test IDs for

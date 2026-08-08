@@ -2,73 +2,103 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { initAds, showInterstitial, showRewarded, isRewardedReady, isNativeAdPlatform } from "@37apps/core/ads.js";
 import { AD_IDS } from "./adIds.js";
 import { initAudio, sfx } from "@37apps/core/audio.js";
-import { initHaptics } from "@37apps/core/haptics.js";
+import { initHaptics, vibrate } from "@37apps/core/haptics.js";
 import { createBestScoreStore } from "@37apps/core/save.js";
-import { baseTheme, fontUI, fontDisplay } from "@37apps/core/theme.js";
-import ScoreHeader from "@37apps/core/components/ScoreHeader.jsx";
+import { fontUI, fontDisplay } from "@37apps/core/theme.js";
+import { useGameCanvas, canvasStyle } from "@37apps/core/canvas/useGameCanvas.js";
+import { withAlpha } from "@37apps/core/canvas/color.js";
 import StartScreen from "@37apps/core/components/StartScreen.jsx";
 import GameOverCard from "@37apps/core/components/GameOverCard.jsx";
 import SettingsScreen from "@37apps/core/components/SettingsScreen.jsx";
+import { createGame, drawHero } from "./game/engine.js";
+import { palette, IMPACT_MS } from "./game/constants.js";
 
-const { loadBestScore, saveBestScore, resetBestScore } = createBestScoreStore("skyhop.bestScore");
+const { loadBestScore, saveBestScore, resetBestScore } = createBestScoreStore("line.bestScore");
 
-/* ── 37apps brand kit: light neutral base + Signal Coral accent ── */
-const palette = {
-  ...baseTheme,
-  player: "#FF4529",
-  playerGlow: "rgba(255,69,41,0.5)",
-  pipe: "#726F7C",
-  pipeEdge: "rgba(255,69,41,0.55)",
+const DEATH_TITLE = {
+  bar: "Blocked!",
+  arc: "Clipped the arc!",
+  blade: "Sliced!",
+  gate: "Missed the gate!",
 };
 
-const PLAYER_X = 90;
-const PLAYER_RADIUS = 18;
-const GRAVITY = 1600;
-const FLAP_VELOCITY = -430;
-const MAX_FALL_SPEED = 700;
-
-const PIPE_WIDTH = 70;
-const SPAWN_GAP_X = 260;
-const BASE_SCROLL_SPEED = 200;
-const SCROLL_SPEED_PER_SCORE = 4;
-const MAX_SCROLL_BONUS = 160;
-
-const START_GAP_HEIGHT = 190;
-const GAP_SHRINK_PER_SCORE = 4;
-const MIN_GAP_HEIGHT = 120;
-const MAX_TILT_DEG = 8;
-
-function gapHeightForScore(score) {
-  return Math.max(MIN_GAP_HEIGHT, START_GAP_HEIGHT - score * GAP_SHRINK_PER_SCORE);
+/** Respects the OS motion preference — shake and particle counts gate off it. */
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onChange = () => setReduced(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  return reduced;
 }
 
-function scrollSpeedForScore(score) {
-  return BASE_SCROLL_SPEED + Math.min(score * SCROLL_SPEED_PER_SCORE, MAX_SCROLL_BONUS);
+/* ── Charge meter: four notches that fill, then burn back down as SURGE
+   spends itself. On a dark field the track is a light hairline — the inverse
+   of the light-field games, for the same reason: contrast against the ground
+   it actually sits on. ── */
+function ChargeMeter({ charge, surge }) {
+  return (
+    <div style={{ display: "flex", gap: 4 }}>
+      {Array.from({ length: 4 }).map((_, i) => {
+        const fill = Math.max(0, Math.min(1, charge * 4 - i));
+        return (
+          <div key={i} style={{
+            width: 20, height: 6, borderRadius: 3, overflow: "hidden",
+            background: "rgba(255,255,255,0.12)",
+            boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.22)",
+          }}>
+            <div style={{
+              width: `${fill * 100}%`, height: "100%", borderRadius: 3,
+              background: surge ? palette.lineHot : palette.orb,
+              boxShadow: fill > 0 ? `0 0 8px ${withAlpha(palette.orb, 0.9)}` : "none",
+              transition: "width 0.18s ease",
+            }} />
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
-let idCounter = 1;
-function makePipe(x, trackHeight, gapHeight) {
-  const margin = gapHeight / 2 + 40;
-  const gapCenter = margin + Math.random() * Math.max(0, trackHeight - margin * 2);
-  const tilt = (Math.random() * 2 - 1) * MAX_TILT_DEG;
-  return { id: idCounter++, x, gapCenter, gapHeight, tilt, passed: false };
+/** Menu hero — the same trail/head renderer as gameplay. */
+function HeroPreview({ reduced }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const cv = ref.current;
+    if (!cv) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    cv.width = 170 * dpr; cv.height = 150 * dpr;
+    const ctx = cv.getContext("2d");
+    ctx.scale(dpr, dpr);
+    let raf;
+    const t0 = performance.now();
+    const loop = (now) => {
+      drawHero(ctx, 170, 150, reduced ? 0.8 : (now - t0) / 1000);
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [reduced]);
+  return <canvas ref={ref} style={{ width: 170, height: 150, display: "block" }} />;
 }
 
-export default function Skyhop() {
+export default function Line() {
   const [phase, setPhase] = useState("start");
   const [score, setScore] = useState(0);
   const [best, setBest] = useState(0);
-  const [, setFrameTick] = useState(0);
+  const [hud, setHud] = useState({ charge: 0, surge: false });
+  const [zoneBanner, setZoneBanner] = useState(null);
+  const [deathCause, setDeathCause] = useState("bar");
 
-  const trackRef = useRef(null);
-  const pipesRef = useRef([]);
-  const playerYRef = useRef(0);
-  const velocityRef = useRef(0);
-  const scoreRef = useRef(0);
-  const spawnCursorRef = useRef(0);
+  const phaseRef = useRef("start");
   const bestLoadedRef = useRef(false);
-  const rafRef = useRef(null);
   const continueUsedRef = useRef(false);
+  const scoreRef = useRef(0);
+  const reduced = usePrefersReducedMotion();
 
   useEffect(() => {
     initAds(AD_IDS);
@@ -77,10 +107,7 @@ export default function Skyhop() {
   }, []);
 
   useEffect(() => {
-    loadBestScore().then(stored => {
-      setBest(stored);
-      bestLoadedRef.current = true;
-    });
+    loadBestScore().then(stored => { setBest(stored); bestLoadedRef.current = true; });
   }, []);
 
   useEffect(() => {
@@ -88,222 +115,255 @@ export default function Skyhop() {
     saveBestScore(best);
   }, [best]);
 
-  /* ── interstitial fires on give-up (RETRY / tap-to-restart), not on death
-     itself — that way a player offered a rewarded continue only ever sees
-     one ad, not a forced interstitial immediately followed by a rewarded-ad
-     prompt. ── */
-  const endGame = useCallback(() => {
-    setPhase(p => (p === "play" ? "dead" : p));
+  useEffect(() => { phaseRef.current = phase; }, [phase]);
+
+  /* death is two beats: "impact" keeps the wreckage on screen while the frame
+     flashes and shakes, then "dead" swaps in the Game Over page. The
+     interstitial fires on RETRY rather than on death, so a player offered a
+     rewarded continue only ever sits through one ad. */
+  const endGame = useCallback((cause) => {
+    if (phaseRef.current !== "play") return;
+    setDeathCause(cause);
+    sfx.hit();
+    vibrate([18, 45, 22]);
+    phaseRef.current = "impact";
+    setPhase("impact");
     setBest(b => (scoreRef.current > b ? scoreRef.current : b));
+    setTimeout(() => setPhase(p => (p === "impact" ? "dead" : p)), IMPACT_MS);
   }, []);
 
-  const handleWatchAdContinue = useCallback(async () => {
-    const reward = await showRewarded(AD_IDS);
-    if (!reward) return false;
-    continueUsedRef.current = true;
-    velocityRef.current = 0;
-    const trackHeight = trackRef.current ? trackRef.current.clientHeight : 640;
-    playerYRef.current = trackHeight / 2;
-    /* clear pipes near the player so reviving doesn't drop them straight
-       back into the pipe that just killed them */
-    pipesRef.current = pipesRef.current.filter(p => p.x < PLAYER_X - 160 || p.x > PLAYER_X + 320);
-    setPhase("play");
-    return true;
-  }, []);
+  const { canvasRef, engineRef } = useGameCanvas({
+    create: () => createGame({
+      onOrb: () => { sfx.score(); vibrate(8); },
+      onSurge: () => { sfx.power(); vibrate([12, 30, 12]); },
+      onCut: () => { sfx.shift(); vibrate(10); },
+      onDeath: (cause) => endGame(cause),
+      onZone: (name) => { setZoneBanner({ name, key: Date.now() }); sfx.shift(); },
+    }),
+    onReady: (g) => { g.reset(); },
+    isRunning: () => phaseRef.current === "play",
+    sample: (g) => ({ score: Math.floor(g.score), charge: g.charge, surge: g.surge > 0 }),
+    onSample: (snap) => {
+      scoreRef.current = snap.score;
+      if (phaseRef.current !== "play") return;
+      setScore(snap.score);
+      setHud({ charge: snap.charge, surge: snap.surge });
+    },
+    deps: [endGame],
+  });
 
-  /* ── main loop ── */
   useEffect(() => {
-    if (phase !== "play") return;
+    if (engineRef.current) engineRef.current.reduced = reduced;
+  }, [reduced, engineRef]);
 
-    let last = performance.now();
-    const tick = (now) => {
-      const dt = Math.min((now - last) / 1000, 0.05);
-      last = now;
-
-      const trackHeight = trackRef.current ? trackRef.current.clientHeight : 640;
-      const speed = scrollSpeedForScore(scoreRef.current);
-
-      velocityRef.current = Math.min(MAX_FALL_SPEED, velocityRef.current + GRAVITY * dt);
-      playerYRef.current += velocityRef.current * dt;
-
-      if (playerYRef.current < PLAYER_RADIUS) {
-        playerYRef.current = PLAYER_RADIUS;
-        velocityRef.current = 0;
-      }
-      if (playerYRef.current > trackHeight - PLAYER_RADIUS) {
-        sfx.hit();
-        endGame();
-        return;
-      }
-
-      let gameOver = false;
-      const pipes = pipesRef.current
-        .map(p => ({ ...p, x: p.x - speed * dt }))
-        .filter(p => p.x + PIPE_WIDTH > -20);
-
-      for (const p of pipes) {
-        const overlapsX = PLAYER_X + PLAYER_RADIUS > p.x && PLAYER_X - PLAYER_RADIUS < p.x + PIPE_WIDTH;
-        if (overlapsX) {
-          const gapTop = p.gapCenter - p.gapHeight / 2;
-          const gapBottom = p.gapCenter + p.gapHeight / 2;
-          if (playerYRef.current - PLAYER_RADIUS < gapTop || playerYRef.current + PLAYER_RADIUS > gapBottom) {
-            gameOver = true;
-            break;
-          }
-        } else if (!p.passed && p.x + PIPE_WIDTH < PLAYER_X) {
-          p.passed = true;
-          scoreRef.current += 1;
-          setScore(scoreRef.current);
-          sfx.score();
-        }
-      }
-
-      if (gameOver) {
-        pipesRef.current = pipes;
-        sfx.hit();
-        endGame();
-        return;
-      }
-
-      spawnCursorRef.current += speed * dt;
-      if (spawnCursorRef.current >= SPAWN_GAP_X) {
-        pipes.push(makePipe(trackRef.current ? trackRef.current.clientWidth : 360, trackHeight, gapHeightForScore(scoreRef.current)));
-        spawnCursorRef.current -= SPAWN_GAP_X;
-      }
-
-      pipesRef.current = pipes;
-      setFrameTick(t => t + 1);
-      rafRef.current = requestAnimationFrame(tick);
-    };
-
-    rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [phase, endGame]);
+  useEffect(() => {
+    if (!zoneBanner) return;
+    const id = setTimeout(() => setZoneBanner(null), 1900);
+    return () => clearTimeout(id);
+  }, [zoneBanner]);
 
   const startGame = useCallback(() => {
-    const trackHeight = trackRef.current ? trackRef.current.clientHeight : 640;
-    pipesRef.current = [];
-    playerYRef.current = trackHeight / 2;
-    velocityRef.current = 0;
-    scoreRef.current = 0;
-    spawnCursorRef.current = SPAWN_GAP_X - 200;
+    const g = engineRef.current;
+    if (!g) return;
+    sfx.select();
+    g.reset();
+    g.running = true;
     continueUsedRef.current = false;
+    scoreRef.current = 0;
     setScore(0);
+    setHud({ charge: 0, surge: false });
+    setZoneBanner(null);
+    phaseRef.current = "play";
     setPhase("play");
-  }, []);
+  }, [engineRef]);
 
   const handleRetry = useCallback(() => {
     showInterstitial(AD_IDS);
     startGame();
   }, [startGame]);
 
-  const handleTap = useCallback(() => {
-    if (phase === "start") {
-      startGame();
-      return;
-    }
-    if (phase === "dead") {
-      handleRetry();
-      return;
-    }
-    if (phase !== "play") return;
-    velocityRef.current = FLAP_VELOCITY;
-    sfx.tap();
-  }, [phase, startGame, handleRetry]);
+  const handleWatchAdContinue = useCallback(async () => {
+    const reward = await showRewarded(AD_IDS);
+    if (!reward) return false;
+    continueUsedRef.current = true;
+    engineRef.current.revive();
+    phaseRef.current = "play";
+    setPhase("play");
+    return true;
+  }, [engineRef]);
 
-  const pipes = pipesRef.current;
-  const playerY = playerYRef.current;
-  const tiltDeg = Math.max(-25, Math.min(80, velocityRef.current / 12));
+  /* relative drag: absolute follow would park the player's thumb on top of
+     the tip, and the tip is the one thing they need to watch */
+  const onPointerDown = useCallback((e) => {
+    if (phaseRef.current !== "play") return;
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    engineRef.current?.pointerDown(e.clientX);
+  }, [engineRef]);
+  const onPointerMove = useCallback((e) => {
+    if (phaseRef.current !== "play") return;
+    engineRef.current?.pointerMove(e.clientX);
+  }, [engineRef]);
+  const onPointerUp = useCallback(() => { engineRef.current?.pointerUp(); }, [engineRef]);
+
+  useEffect(() => {
+    const set = (d) => engineRef.current?.setKeyDir(d);
+    const down = (e) => {
+      if (e.key === "ArrowLeft" || e.key === "a") set(-1);
+      if (e.key === "ArrowRight" || e.key === "d") set(1);
+    };
+    const up = (e) => { if (["ArrowLeft", "a", "ArrowRight", "d"].includes(e.key)) set(0); };
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    return () => { window.removeEventListener("keydown", down); window.removeEventListener("keyup", up); };
+  }, [engineRef]);
+
+  const playing = phase === "play" || phase === "impact";
 
   return (
-    <div
-      onPointerDown={handleTap}
-      style={{
-        minHeight: "100vh", display: "flex", flexDirection: "column",
-        background: palette.bg, fontFamily: fontUI,
-        userSelect: "none", WebkitUserSelect: "none",
-        touchAction: "none", position: "relative", overflow: "hidden",
-      }}
-    >
-      {phase === "play" && <ScoreHeader score={score} best={best} theme={palette} />}
+    <div style={{
+      position: "fixed", inset: 0, background: palette.ink, fontFamily: fontUI,
+      userSelect: "none", WebkitUserSelect: "none", touchAction: "none", overflow: "hidden",
+    }}>
+      <canvas
+        ref={canvasRef}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        style={canvasStyle}
+      />
 
-      <div ref={trackRef} style={{ flex: 1, position: "relative", overflow: "hidden" }}>
-        {phase === "play" && (
-          <>
-            {pipes.map(p => {
-              const gapTop = p.gapCenter - p.gapHeight / 2;
-              const gapBottom = p.gapCenter + p.gapHeight / 2;
-              return (
-                <div key={p.id}>
-                  <div style={{
-                    position: "absolute", left: p.x, width: PIPE_WIDTH, top: 0, height: gapTop,
-                    background: palette.pipe, borderBottom: `3px solid ${palette.pipeEdge}`,
-                    transform: `rotate(${p.tilt}deg)`, transformOrigin: "bottom center",
-                  }} />
-                  <div style={{
-                    position: "absolute", left: p.x, width: PIPE_WIDTH, top: gapBottom, bottom: 0,
-                    background: palette.pipe, borderTop: `3px solid ${palette.pipeEdge}`,
-                    transform: `rotate(${p.tilt}deg)`, transformOrigin: "top center",
-                  }} />
-                </div>
-              );
-            })}
-
-            {/* player */}
+      {playing && (
+        <div style={{
+          position: "absolute", left: 0, right: 0, top: 0, zIndex: 2, pointerEvents: "none",
+          padding: "calc(14px + env(safe-area-inset-top)) 20px 0",
+          display: "flex", justifyContent: "space-between", alignItems: "flex-start",
+        }}>
+          <div>
             <div style={{
-              position: "absolute", left: PLAYER_X, top: playerY,
-              width: PLAYER_RADIUS * 2, height: PLAYER_RADIUS * 2,
-              transform: `translate(-50%, -50%) rotate(${tiltDeg}deg)`,
-              background: palette.player, borderRadius: "50%",
-              boxShadow: `0 0 18px ${palette.playerGlow}`,
-              zIndex: 3,
-            }} />
-          </>
-        )}
+              fontSize: 10, letterSpacing: "0.16em", fontWeight: 800,
+              color: "rgba(255,255,255,0.55)", textTransform: "uppercase",
+            }}>Distance</div>
+            <div style={{
+              fontFamily: fontDisplay, fontWeight: 900, fontSize: 40, lineHeight: 1.05,
+              color: "#FFFFFF", letterSpacing: -1,
+              textShadow: `0 0 24px ${withAlpha(palette.line, 0.5)}`,
+            }}>
+              {score}<span style={{ fontSize: 15, marginLeft: 3, opacity: 0.6 }}>m</span>
+            </div>
+            <div style={{ marginTop: 9 }}>
+              <ChargeMeter charge={hud.charge} surge={hud.surge} />
+            </div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div style={{
+              fontSize: 10, letterSpacing: "0.16em", fontWeight: 800,
+              color: "rgba(255,255,255,0.45)", textTransform: "uppercase",
+            }}>Best</div>
+            <div style={{ fontFamily: fontDisplay, fontWeight: 800, fontSize: 18, color: "rgba(255,255,255,0.85)" }}>{best}</div>
+          </div>
+        </div>
+      )}
 
-        {/* ── START ── */}
-        {phase === "start" && (
-          <StartScreen
-            accent={palette.player}
-            title="SKYHOP"
-            preview={
-              <div style={{
-                width: PLAYER_RADIUS * 2, height: PLAYER_RADIUS * 2, borderRadius: "50%",
-                background: palette.player, boxShadow: `0 0 18px ${palette.playerGlow}`,
-              }} />
-            }
-            description="Tap to flap and dodge the gaps. Gaps get tighter — and tilt — as your score climbs."
-            best={best}
-            onPlay={startGame}
-            onSettings={() => setPhase("settings")}
-          />
-        )}
+      {playing && hud.surge && (
+        <div style={{
+          position: "absolute", left: "50%", top: "calc(22px + env(safe-area-inset-top))",
+          transform: "translateX(-50%)", zIndex: 3, pointerEvents: "none",
+          padding: "6px 16px", borderRadius: 99,
+          background: palette.line, color: palette.ink,
+          fontFamily: fontDisplay, fontWeight: 900, fontSize: 13, letterSpacing: "0.14em",
+          boxShadow: `0 0 26px ${withAlpha(palette.line, 0.9)}`,
+          animation: reduced ? "none" : "surgeThrob 0.55s ease-in-out infinite",
+        }}>SURGE ×2</div>
+      )}
 
-        {/* ── GAME OVER ── */}
-        {phase === "dead" && (
-          <GameOverCard
-            accent={palette.player}
-            title="Crashed!"
-            score={score}
-            best={best}
-            onRetry={handleRetry}
-            onWatchAdContinue={
-              !continueUsedRef.current && isNativeAdPlatform() && isRewardedReady()
-                ? handleWatchAdContinue
-                : undefined
-            }
-          />
-        )}
+      {playing && zoneBanner && (
+        <div key={zoneBanner.key} style={{
+          position: "absolute", left: 0, right: 0, top: "30%", zIndex: 3,
+          textAlign: "center", pointerEvents: "none",
+          animation: "zoneIn 1.9s ease-out forwards",
+        }}>
+          <div style={{
+            fontSize: 10, letterSpacing: "0.3em", fontWeight: 800,
+            color: "rgba(255,255,255,0.5)", textTransform: "uppercase",
+          }}>Sector</div>
+          <div style={{
+            fontFamily: fontDisplay, fontWeight: 900, fontSize: 34, letterSpacing: "0.08em",
+            color: "#FFFFFF", textShadow: `0 0 34px ${withAlpha(palette.line, 0.8)}`,
+          }}>{zoneBanner.name}</div>
+        </div>
+      )}
 
-        {/* ── SETTINGS ── */}
-        {phase === "settings" && (
-          <SettingsScreen
-            accent={palette.player}
-            onBack={() => setPhase("start")}
-            onResetProgress={() => { resetBestScore(); setBest(0); }}
-          />
-        )}
-      </div>
+      {phase === "impact" && (
+        <div style={{
+          position: "absolute", inset: 0, zIndex: 4, pointerEvents: "none",
+          background: palette.line, animation: "impactFlash 0.3s ease-out forwards",
+        }} />
+      )}
+
+      {phase === "start" && (
+        <StartScreen
+          accent={palette.bar}
+          title={
+            <span style={{
+              background: `linear-gradient(135deg, ${palette.line}, ${palette.arc} 55%, ${palette.bar})`,
+              WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent",
+              filter: `drop-shadow(0 0 22px ${withAlpha(palette.line, 0.35)})`,
+              fontSize: 46, letterSpacing: 2,
+            }}>LINE</span>
+          }
+          preview={
+            <div style={{
+              position: "relative", borderRadius: 20, overflow: "hidden",
+              background: palette.ink, padding: 4,
+              boxShadow: `0 0 0 1px rgba(0,0,0,0.08), 0 14px 30px -18px rgba(0,0,0,0.6)`,
+            }}>
+              <HeroPreview reduced={reduced} />
+            </div>
+          }
+          description="Draw one unbroken line as far as you can. Drag to steer — dodge bars, arcs, blades and gates, and grab orbs to charge a SURGE that cuts straight through them."
+          best={best}
+          onPlay={startGame}
+          onSettings={() => setPhase("settings")}
+        />
+      )}
+
+      {phase === "dead" && (
+        <GameOverCard
+          accent={palette.bar}
+          title={DEATH_TITLE[deathCause] || "Broken!"}
+          score={score}
+          best={best}
+          onRetry={handleRetry}
+          onWatchAdContinue={
+            !continueUsedRef.current && isNativeAdPlatform() && isRewardedReady()
+              ? handleWatchAdContinue
+              : undefined
+          }
+        />
+      )}
+
+      {phase === "settings" && (
+        <SettingsScreen
+          accent={palette.bar}
+          onBack={() => setPhase("start")}
+          onResetProgress={() => { resetBestScore(); setBest(0); }}
+        />
+      )}
+
+      <style>{`
+        @keyframes impactFlash { 0% { opacity: 0.5; } 100% { opacity: 0; } }
+        @keyframes surgeThrob {
+          0%, 100% { transform: translateX(-50%) scale(1); }
+          50% { transform: translateX(-50%) scale(1.07); }
+        }
+        @keyframes zoneIn {
+          0%   { opacity: 0; transform: translateY(14px) scale(0.94); }
+          14%  { opacity: 1; transform: translateY(0) scale(1); }
+          72%  { opacity: 1; transform: translateY(0) scale(1); }
+          100% { opacity: 0; transform: translateY(-16px) scale(1); }
+        }
+      `}</style>
     </div>
   );
 }
