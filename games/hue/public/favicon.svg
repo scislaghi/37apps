@@ -1,0 +1,10 @@
+<!-- Brand kit v2 §04: fixed squircle frame + bright accent background + one dark
+     silhouette. Hue's glyph is its own rule as a single mark — a four-quarter
+     ring with one quarter open, and the ball slipping through that opening. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="15" fill="#3D64FF"/>
+  <path d="M32 12a20 20 0 0 1 20 20" stroke="#15141B" stroke-width="7" stroke-linecap="round"/>
+  <path d="M52 32a20 20 0 0 1-20 20" stroke="#15141B" stroke-width="7" stroke-linecap="round" opacity="0.72"/>
+  <path d="M12 32a20 20 0 0 1 20-20" stroke="#15141B" stroke-width="7" stroke-linecap="round" opacity="0.45"/>
+  <circle cx="32" cy="32" r="7.5" fill="#15141B"/>
+</svg>
