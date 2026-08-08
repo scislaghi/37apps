@@ -1,0 +1,8 @@
+<!-- Brand kit v2 §04: fixed squircle frame + bright accent background + one dark
+     silhouette. Icarus' glyph is a single feathered wing — the mechanic (it
+     carries you, and the sun takes it away) as one readable shape at 60px. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="15" fill="#FFA31A"/>
+  <path d="M52 12c-6.4 1-13.6 4.2-19.6 9.4C25.8 27.2 21.4 34.8 20 42.6l-6.6 8.6c-.9 1.2.4 2.8 1.8 2.2l9.9-4.3c7.6-1.2 14.6-5.2 19.7-11.2C50.4 31.4 52.6 21.4 52 12Z" fill="#15141B"/>
+  <path d="M26 44c3.6-7.6 9-14.2 15.8-19.2M22.5 49.2c4.2-8.8 10.4-16.4 18.2-22.2" stroke="#FFA31A" stroke-width="2.4" stroke-linecap="round"/>
+</svg>
