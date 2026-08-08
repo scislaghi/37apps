@@ -1,0 +1,6 @@
+- generic [ref=e5]:
+  - button "Mute sound" [ref=e6] [cursor=pointer]
+  - generic [ref=e11]: WARP
+  - generic [ref=e15]: Fall forever down a tunnel that keeps changing shape. Hold either side of the screen to roll around it, slip through every gap, and grab cores to charge a HYPER that smashes straight through.
+  - button "PLAY" [ref=e16] [cursor=pointer]
+  - button "Settings" [ref=e17] [cursor=pointer]

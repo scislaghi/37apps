@@ -1,0 +1,12 @@
+<!-- Brand kit v2 §04: fixed squircle frame + bright accent background + one dark
+     silhouette. Warp's glyph is the tunnel read head-on — three nested octagons
+     shrinking toward a vanishing point, with the craft's chevron on the ring. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="15" fill="#7B42FF"/>
+  <g stroke="#15141B" fill="none" stroke-linejoin="round">
+    <path d="M32 6 L50.4 13.6 L58 32 L50.4 50.4 L32 58 L13.6 50.4 L6 32 L13.6 13.6 Z" stroke-width="3.4"/>
+    <path d="M32 18 L41.9 22.1 L46 32 L41.9 41.9 L32 46 L22.1 41.9 L18 32 L22.1 22.1 Z" stroke-width="2.8"/>
+    <path d="M32 27 L35.5 28.5 L37 32 L35.5 35.5 L32 37 L28.5 35.5 L27 32 L28.5 28.5 Z" stroke-width="2.2"/>
+  </g>
+  <path d="M32 47.5 L26.5 55 L32 52.5 L37.5 55 Z" fill="#15141B"/>
+</svg>
