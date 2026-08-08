@@ -69,6 +69,22 @@ export function genRow(n, prevRow) {
   return row;
 }
 
+/* ── gems: a purely decorative-to-generation overlay. Deliberately *not* a tile
+   type — the fairness pass above reasons about which tiles are survivable, and
+   a gem must never change that answer. Instead it's a stateless hash of the
+   cell, so both the game loop and the renderer can ask "is there a gem here?"
+   without either of them owning a table the other has to stay in sync with. ── */
+function hash2(a, b) {
+  let h = Math.imul(a, 374761393) + Math.imul(b, 668265263);
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+
+/** Gems sit only on SAFE tiles — callers must check the tile type too. */
+export function gemAt(row, col) {
+  return row >= 5 && hash2(row, col) < 0.09;
+}
+
 /* rows must be generated strictly in order (0, 1, 2, ...) since each row's
    fairness pass depends on the actual contents of the row below it — callers
    (rendering in particular) may ask for a high row before a low one, so this

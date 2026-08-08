@@ -122,4 +122,7 @@ export const sfx = {
   score: () => playNotes([659.25, 987.77], { type: 'square', noteDuration: 0.1, gap: 0.08, gain: 0.22 }),
   /** Descending 3-note "failure" riff — used for crashes/wrong moves/game over. */
   hit: () => playNotes([392, 293.66, 220], { type: 'sawtooth', noteDuration: 0.16, gap: 0.11, gain: 0.26, filterFreq: 2200 }),
+  /** Rising 4-note fanfare for entering a power-up / charged state — longer
+      and brighter than `score` so a power-up never reads as "just a pickup". */
+  power: () => playNotes([523.25, 659.25, 783.99, 1046.5], { type: 'square', noteDuration: 0.14, gap: 0.075, gain: 0.24, filterFreq: 7000 }),
 };

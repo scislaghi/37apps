@@ -139,14 +139,17 @@ and fonts.)*
 - [x] Wire AdMob (banner + interstitial) in Ploop Chess with Google's public
       test ad unit IDs — confirmed rendering a real test banner on Android
 - [x] Persist best score locally (`@capacitor/preferences`) in Ploop Chess
-- [x] Renamed Ploop Chess to **Ploop Hunt** and reworked it end-to-end —
-      new name/app id (`games/ploop-hunt/`,
-      `com.simonecislaghi.ploophunt`), icon-based pieces instead of text
-      characters, all move-hint overlays removed, player fixed to
-      omnidirectional movement, enemies now take a telegraphed chase move
-      after every player move (can catch the player), captures spawn a
-      safe-placed replacement, plus slide/telegraph/spawn/capture
-      animations and procedural SFX via `@37apps/core/audio.js`
+- [x] Renamed Ploop Chess to Ploop Hunt and reworked it end-to-end —
+      icon-based pieces instead of text characters, all move-hint overlays
+      removed, player fixed to omnidirectional movement, enemies now take a
+      telegraphed chase move after every player move (can catch the player),
+      captures spawn a safe-placed replacement, plus slide/telegraph/spawn/
+      capture animations and procedural SFX via `@37apps/core/audio.js`
+- [x] Renamed Ploop Hunt to **Pounce** (`games/pounce/`,
+      `com.simonecislaghi.pounce`) and gave it a full art/animation pass:
+      pieces whose silhouette is their move set, move trails, telegraph beam
+      + destination ghost, capture bursts, a held death beat, and a
+      pre-round 5×5 / 7×7 board-size picker with a best score per size
 - [x] Scaffold Morph as a React + Vite + Capacitor project
       (`games/morph/`) — game #2, built from the drag-to-morph idea; core
       loop verified headless, AdMob + save wired the same way as game #1
@@ -165,6 +168,30 @@ and fonts.)*
       (`games/skyhop/`) — game #5, Flappy Bird–style flap/gravity physics;
       built using `@37apps/core` from the start; core loop verified
       headless, AdMob + save wired the same way as games #1–#4
+- [x] Extract `packages/core/canvas` — the shared canvas foundation used by
+      Prometheus, Icarus and Line: colour helpers, the progress→sky ladder,
+      the six-layer parallax backdrop (scroll passed as {sx, sy} so one
+      implementation serves both a vertical climber and a side-scroller), a
+      particle pool, the flame primitive, and `useGameCanvas` (DPR sizing,
+      resize, one RAF loop, and HUD sampling at ~15 Hz instead of re-rendering
+      React 60×/s next to a canvas that's already drawing everything)
+- [x] Rebuild the old Skyhop scaffold into three separate games, since the
+      original brief turned out to be three ideas rather than one:
+      - **Prometheus** (`games/prometheus/`, game #5) — hop-up-the-cliff
+        climber toward Olympus; tap = leap up, swipe = leap diagonally;
+        crumbling clouds, the eagle, storm clouds, falling boulders; embers →
+        BLAZE. Row generation carries a reachability contract so no row is a
+        dead end
+      - **Icarus** (`games/icarus/`, game #6) — the flap game; horizontal
+        flight between a sun that melts your wax above and a sea that drowns
+        you below, with spires, gulls, crags and storms in between; feathers →
+        GLIDE. The melt is drawn on the character, not just metered
+      - **Line** (`games/line/`, game #7) — dark neon vertical runner; the
+        player is a stroke whose persistent trail is the record of the run;
+        bars, arcs, blades, gates; orbs → SURGE
+      All three share the canvas foundation and the unchanged `@37apps/core`
+      menu/game-over/settings chrome, and each was verified in a real browser
+      via Playwright with a scripted bot for balance
 - [x] Scaffold Swipe as a React + Vite + Capacitor project
       (`games/swipe/`) — game #6, directional hex-swipe with inverting
       "trap" hexes; rebuilt from a canvas prototype into the shared
@@ -178,11 +205,19 @@ and fonts.)*
       core loop verified in a real browser via Playwright (climbing
       progress, tree-blocking, both death paths, retry), AdMob + save
       wired the same way as games #1–#6
+- [x] Scaffold Blip as a React + Vite + Capacitor project (`games/blip/`) —
+      game #10, tap-the-lit-cell on a 3×3 or 5×5 board against a 10-second
+      clock that only ever refills from the board; three cell kinds (plain,
+      tap-×N, and a fuse counting in 90 ms units). Built on `@37apps/core`
+      from the start, DOM/inline-style like Pounce; verified in a real browser
+      via Playwright with a scripted bot at several tap paces, which is what
+      caught an uncapped streak bonus and a multi-cell time payout that made
+      fast runs unkillable. `android/`/`ios/` not generated yet
 - [ ] Set up Google Play Console account
 - [ ] Set up real AdMob account + register each game as its own app + real
       ad unit IDs (swap in over the test IDs)
 - [ ] Set up Firebase project (Analytics + Crashlytics)
-- [ ] Publish game #1 (Ploop Hunt) on Android
+- [ ] Publish game #1 (Pounce) on Android
 - [ ] Create privacy policy / terms templates
 - [ ] Set up Apple Developer account
 - [ ] Port game #1 to iOS
