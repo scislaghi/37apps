@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "com.simonecislaghi.ploophunt"
+    namespace = "com.simonecislaghi.pounce"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.simonecislaghi.ploophunt"
+        applicationId "com.simonecislaghi.pounce"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

@@ -1,7 +1,7 @@
 /**
- * Real AdMob ad unit IDs for Ploop Hunt (bundle com.simonecislaghi.ploophunt).
+ * Real AdMob ad unit IDs for Pounce (bundle com.simonecislaghi.pounce).
  *
- * Fill in after: 1) registering Ploop Hunt as its own app in the shared 37apps
+ * Fill in after: 1) registering Pounce as its own app in the shared 37apps
  * AdMob account (one Android app entry + one iOS app entry), 2) creating a
  * Banner, Interstitial, and Rewarded ad unit under each. Leave any field
  * empty until you have it — ads.js falls back to Google's test IDs for

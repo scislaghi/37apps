@@ -1,7 +1,7 @@
-import PloopHunt from './PloopHunt.jsx'
+import Pounce from './Pounce.jsx'
 
 function App() {
-  return <PloopHunt />
+  return <Pounce />
 }
 
 export default App

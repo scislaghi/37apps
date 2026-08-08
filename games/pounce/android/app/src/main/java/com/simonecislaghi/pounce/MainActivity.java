@@ -1,4 +1,4 @@
-package com.simonecislaghi.ploophunt;
+package com.simonecislaghi.pounce;
 
 import com.getcapacitor.BridgeActivity;
 
