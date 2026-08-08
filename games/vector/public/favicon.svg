@@ -1,0 +1,9 @@
+<!-- Brand kit v2 §04: fixed squircle frame + bright accent background + one dark
+     silhouette. Vector's glyph is the dart itself, banking upward between two
+     geometric teeth — the corridor and the arrow in a single mark. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="15" fill="#FF297E"/>
+  <path d="M6 6 L22 6 L14 20 Z" fill="#15141B"/>
+  <path d="M58 58 L42 58 L50 44 Z" fill="#15141B"/>
+  <path d="M48 22 L20 34 L27 36 L24 46 Z" fill="#15141B"/>
+</svg>
